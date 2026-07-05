@@ -1,14 +1,12 @@
-// Step 2 of Meta connect flow: Facebook sends the customer back here with a one-time
-// code. We swap that code for a long-lived access token and store it against their
-// session - this is the token our dashboard uses later to pull their ad data.
+// Step 2 of Meta connect flow: exchange the code for a token, fetch the list of
+// ad accounts this customer manages, and save it against their account. If they
+// manage more than one, they'll be sent to pick which one(s) to track.
 const fetch = require('node-fetch');
-const { saveTokens } = require('./_store');
+const { getUser, saveUser } = require('./_store');
 
 exports.handler = async (event) => {
-  const { code, state } = event.queryStringParameters || {};
-  if (!code || !state) {
-    return { statusCode: 400, body: 'Missing code or state from Facebook redirect.' };
-  }
+  const { code, state: email } = event.queryStringParameters || {};
+  if (!code || !email) return { statusCode: 400, body: 'Missing code or state from Facebook redirect.' };
 
   const tokenParams = new URLSearchParams({
     client_id: process.env.META_APP_ID,
@@ -16,16 +14,12 @@ exports.handler = async (event) => {
     redirect_uri: process.env.META_REDIRECT_URI,
     code
   });
-
   const tokenRes = await fetch(`https://graph.facebook.com/v19.0/oauth/access_token?${tokenParams.toString()}`);
   const tokenData = await tokenRes.json();
-
   if (!tokenData.access_token) {
     return { statusCode: 400, body: 'Could not connect Meta account: ' + JSON.stringify(tokenData) };
   }
 
-  // Exchange the short-lived token for a long-lived one (~60 days) so the customer
-  // doesn't have to reconnect constantly.
   const longLivedParams = new URLSearchParams({
     grant_type: 'fb_exchange_token',
     client_id: process.env.META_APP_ID,
@@ -34,15 +28,28 @@ exports.handler = async (event) => {
   });
   const longLivedRes = await fetch(`https://graph.facebook.com/v19.0/oauth/access_token?${longLivedParams.toString()}`);
   const longLivedData = await longLivedRes.json();
+  const accessToken = longLivedData.access_token || tokenData.access_token;
 
-  await saveTokens(state, 'meta', {
-    accessToken: longLivedData.access_token || tokenData.access_token,
-    expiresIn: longLivedData.expires_in || tokenData.expires_in
-  });
+  // Fetch every ad account this customer manages, so they can pick which one(s) matter.
+  const acctRes = await fetch(`https://graph.facebook.com/v19.0/me/adaccounts?fields=id,name&access_token=${accessToken}`);
+  const acctData = await acctRes.json();
+  const adAccounts = (acctData.data || []).map((a) => ({ id: a.id, name: a.name }));
 
+  const user = await getUser(email);
+  if (!user) return { statusCode: 401, body: 'Session expired. Please log in again.' };
+
+  user.accounts.meta = {
+    accessToken,
+    adAccounts,
+    selectedAdAccountId: adAccounts.length === 1 ? adAccounts[0].id : null,
+    connectedAt: new Date().toISOString()
+  };
+  await saveUser(user);
+
+  const needsPicker = adAccounts.length > 1;
   return {
     statusCode: 302,
-    headers: { Location: '/dashboard.html?connected=meta' },
+    headers: { Location: needsPicker ? '/select-account.html?provider=meta' : '/dashboard.html?connected=meta' },
     body: ''
   };
 };

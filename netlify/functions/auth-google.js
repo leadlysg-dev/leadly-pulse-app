@@ -1,8 +1,11 @@
-// Step 1 of Google connect flow: sends the customer to Google's own login/consent screen.
-const { getOrCreateSessionId, sessionCookie } = require('./_store');
+// Step 1 of Google connect flow. Requires the customer to already be logged in.
+const { getEmailFromRequest } = require('./_store');
 
 exports.handler = async (event) => {
-  const { sid, isNew } = getOrCreateSessionId(event.headers);
+  const email = getEmailFromRequest(event.headers);
+  if (!email) {
+    return { statusCode: 302, headers: { Location: '/login.html?next=connect-google' }, body: '' };
+  }
 
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID,
@@ -11,13 +14,12 @@ exports.handler = async (event) => {
     access_type: 'offline',
     prompt: 'consent',
     scope: 'https://www.googleapis.com/auth/adwords',
-    state: sid
+    state: email
   });
 
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-
-  const headers = { Location: authUrl };
-  if (isNew) headers['Set-Cookie'] = sessionCookie(sid);
-
-  return { statusCode: 302, headers, body: '' };
+  return {
+    statusCode: 302,
+    headers: { Location: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}` },
+    body: ''
+  };
 };

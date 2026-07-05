@@ -91,17 +91,34 @@ It is free.
 
 ---
 
+## How multiple customers and accounts are handled
+
+- **Every customer has a real login** (email + password), not just a browser
+  cookie. They can log in from any device and always land on their own data.
+  Passwords are hashed, never stored in plain text.
+- **One customer, multiple ad accounts**: if a customer manages more than one
+  Meta or Google ad account, they're automatically sent to a picker screen
+  after connecting, and choose which one you track. You (Kenneth) never have
+  to touch this — it's self-serve.
+- **Isolation between customers is enforced by the backend**: every function
+  checks the logged-in customer's own session before returning any data, so
+  customer A can never see customer B's numbers, regardless of what the
+  interface shows.
+- **Team members on one account**: not built into this version. The simplest
+  way to add it later is letting a customer invite a teammate by email, and
+  storing a small list of "allowed emails" on their account record instead of
+  a single owner email.
+
 ## What's simplified for this first version (build these next as you get real customers)
 
-- **Account picker**: if a customer manages multiple ad accounts, this
-  version reads the first one only. Add a dropdown once you have your first
-  real customer with multiple accounts.
-- **Google Ads live numbers**: the OAuth connection works, but pulling live
-  numbers needs the official Google Ads API client library and a selected
-  customer ID — this is the next coding step, flagged clearly in
-  `get-dashboard-data.js`.
+- **Google Ads live numbers**: the OAuth connection and account picker both
+  work, but pulling live spend/lead numbers needs the official Google Ads API
+  client library layered on top — flagged clearly in `get-dashboard-data.js`.
 - **Billing**: there's no payment wall yet. Add Stripe Checkout in front of
   `/dashboard.html` once you're ready to charge.
+- **Password reset**: not built yet — if a customer forgets their password
+  today, you'd need to manually help them. Worth adding before your first
+  real customer.
 - **Multiple industries**: nothing here is industry-specific — the same
   dashboard works for a dental clinic, a gym, or an insurance agent, which
   is exactly what makes this sellable across your client base.

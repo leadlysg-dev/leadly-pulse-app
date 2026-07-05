@@ -1,37 +1,83 @@
-// Shared helper for reading/writing each customer's connected-account tokens.
-// Uses Netlify Blobs - a built-in key/value store, no extra database to set up.
+// Handles customer accounts (email + password), login sessions, and each
+// customer's connected ad accounts. Everything is keyed by email, so a
+// customer sees the same data no matter which device or browser they log in
+// from - and can never see another customer's data.
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const { getStore } = require('@netlify/blobs');
 
-function accountsStore() {
-  return getStore('adpulse-accounts');
+function usersStore() {
+  return getStore('adpulse-users');
 }
 
-// Each customer is identified by a simple session id stored in their browser cookie.
-// This function reads that id from the request, or creates a new one.
-function getOrCreateSessionId(headers) {
+// --- Passwords ---
+// scrypt is built into Node - no extra dependency needed for safe password hashing.
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(password, stored) {
+  const [salt, hash] = stored.split(':');
+  const check = crypto.scryptSync(password, salt, 64).toString('hex');
+  return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(check));
+}
+
+// --- Users ---
+async function getUser(email) {
+  const store = usersStore();
+  return await store.get(email.toLowerCase(), { type: 'json' });
+}
+
+async function createUser(email, password) {
+  const store = usersStore();
+  const key = email.toLowerCase();
+  const existing = await store.get(key, { type: 'json' });
+  if (existing) throw new Error('An account with that email already exists.');
+  const user = {
+    email: key,
+    passwordHash: hashPassword(password),
+    createdAt: new Date().toISOString(),
+    accounts: {} // provider -> { accessToken, refreshToken, adAccounts: [...], selectedAdAccountId }
+  };
+  await store.setJSON(key, user);
+  return user;
+}
+
+async function saveUser(user) {
+  const store = usersStore();
+  await store.setJSON(user.email, user);
+}
+
+// --- Sessions (JWT stored in an httpOnly cookie) ---
+function createSessionCookie(email) {
+  const token = jwt.sign({ email }, process.env.SESSION_SECRET, { expiresIn: '30d' });
+  return `adpulse_session=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000`;
+}
+
+function clearSessionCookie() {
+  return 'adpulse_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0';
+}
+
+function getEmailFromRequest(headers) {
   const cookie = headers.cookie || '';
-  const match = cookie.match(/adpulse_sid=([a-zA-Z0-9-]+)/);
-  if (match) return { sid: match[1], isNew: false };
-  const sid = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-  return { sid, isNew: true };
+  const match = cookie.match(/adpulse_session=([^;]+)/);
+  if (!match) return null;
+  try {
+    const payload = jwt.verify(match[1], process.env.SESSION_SECRET);
+    return payload.email;
+  } catch {
+    return null; // expired or tampered token
+  }
 }
 
-function sessionCookie(sid) {
-  return `adpulse_sid=${sid}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000`;
-}
-
-async function saveTokens(sid, provider, tokenData) {
-  const store = accountsStore();
-  const existingRaw = await store.get(sid, { type: 'json' });
-  const existing = existingRaw || {};
-  existing[provider] = { ...tokenData, connectedAt: new Date().toISOString() };
-  await store.setJSON(sid, existing);
-}
-
-async function getTokens(sid) {
-  const store = accountsStore();
-  const data = await store.get(sid, { type: 'json' });
-  return data || {};
-}
-
-module.exports = { getOrCreateSessionId, sessionCookie, saveTokens, getTokens };
+module.exports = {
+  getUser,
+  createUser,
+  saveUser,
+  verifyPassword,
+  createSessionCookie,
+  clearSessionCookie,
+  getEmailFromRequest
+};
