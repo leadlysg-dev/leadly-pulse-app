@@ -83,6 +83,24 @@ export const api = {
     request('/.netlify/functions/signup', {
       method: 'POST',
       body: JSON.stringify({ email, password })
+    }),
+
+  changePassword: (currentPassword, newPassword) =>
+    request('/.netlify/functions/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ currentPassword, newPassword })
+    }),
+
+  saveAiPrefs: (prefs) =>
+    request('/.netlify/functions/save-ai-prefs', {
+      method: 'POST',
+      body: JSON.stringify(prefs)
+    }),
+
+  disconnectProvider: (provider) =>
+    request('/.netlify/functions/disconnect-provider', {
+      method: 'POST',
+      body: JSON.stringify({ provider })
     })
 };
 

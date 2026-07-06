@@ -19,7 +19,11 @@ async function getUser(email) {
   return await store.get(email.toLowerCase(), { type: 'json' });
 }
 
-async function createUser(email, password) {
+// opts.passwordSet=false marks the password as a placeholder (accounts
+// auto-created by Google sign-in). Blob users predating this field have no
+// passwordSetAt key at all - callers treat that as "set", matching the
+// Supabase migration's backfill.
+async function createUser(email, password, opts = {}) {
   const store = usersStore();
   const key = email.toLowerCase();
   const existing = await store.get(key, { type: 'json' });
@@ -27,6 +31,7 @@ async function createUser(email, password) {
   const user = {
     email: key,
     passwordHash: hashPassword(password),
+    passwordSetAt: opts.passwordSet === false ? null : new Date().toISOString(),
     createdAt: new Date().toISOString(),
     accounts: {} // provider -> { accessToken, refreshToken, adAccounts: [...], selectedAdAccountId, selectedMetrics }
   };
@@ -39,4 +44,23 @@ async function saveUser(user) {
   await store.setJSON(user.email, user);
 }
 
-module.exports = { getUser, createUser, saveUser };
+async function setPassword(email, password) {
+  const store = usersStore();
+  const key = email.toLowerCase();
+  const user = await store.get(key, { type: 'json' });
+  if (!user) throw new Error('User not found.');
+  user.passwordHash = hashPassword(password);
+  user.passwordSetAt = new Date().toISOString();
+  await store.setJSON(key, user);
+}
+
+async function saveAiPrefs(email, prefs) {
+  const store = usersStore();
+  const key = email.toLowerCase();
+  const user = await store.get(key, { type: 'json' });
+  if (!user) throw new Error('User not found.');
+  user.aiPrefs = prefs;
+  await store.setJSON(key, user);
+}
+
+module.exports = { getUser, createUser, saveUser, setPassword, saveAiPrefs };

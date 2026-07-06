@@ -3,7 +3,8 @@ import './TopNav.css';
 
 const TABS = [
   { to: '/dashboard.html', label: 'Dashboard' },
-  { to: '/reports.html', label: 'Reports & Insights' }
+  { to: '/reports.html', label: 'Reports & Insights' },
+  { to: '/settings.html', label: 'Settings' }
 ];
 
 export default function TopNav({ email }) {

@@ -68,8 +68,8 @@
   text-decoration: underline;
 }
 
-/* Phones: the email is the least important thing in the bar - drop it so
-   the tabs stay tappable on one row. */
+/* Phones: the email is the least important thing in the bar - drop it, and
+   tighten the three tabs so they and "Log out" fit a 360px row. */
 @media (max-width: 560px) {
   .top-nav-inner {
     padding: 12px 14px;
@@ -82,5 +82,14 @@
 
   .top-nav-brand span {
     display: none;
+  }
+
+  .top-nav-tabs {
+    gap: 2px;
+  }
+
+  .top-nav-tab {
+    font-size: 12px;
+    padding: 6px 8px;
   }
 }
