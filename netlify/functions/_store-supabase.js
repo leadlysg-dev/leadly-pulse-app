@@ -151,6 +151,83 @@ async function saveAiInsight(email, insight) {
   if (error) fail(error, 'saving AI insight');
 }
 
+// --- Alert rules (created by the AI assistant) ---
+
+async function userIdFor(email) {
+  const { data: u, error } = await db()
+    .from('users')
+    .select('id')
+    .eq('email', email.toLowerCase())
+    .maybeSingle();
+  if (error) fail(error, 'looking up user');
+  if (!u) throw new Error('User not found.');
+  return u.id;
+}
+
+function assembleRule(row) {
+  return {
+    id: row.id,
+    metric: row.metric,
+    channel: row.channel,
+    comparison: row.comparison,
+    threshold: Number(row.threshold),
+    timeframe: row.timeframe,
+    enabled: row.enabled,
+    description: row.description,
+    createdAt: row.created_at
+  };
+}
+
+async function listAlertRules(email) {
+  const userId = await userIdFor(email);
+  const { data, error } = await db()
+    .from('alert_rules')
+    .select('id, metric, channel, comparison, threshold, timeframe, enabled, description, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) fail(error, 'loading alert rules');
+  return (data || []).map(assembleRule);
+}
+
+async function createAlertRule(email, rule) {
+  const userId = await userIdFor(email);
+  const { data, error } = await db()
+    .from('alert_rules')
+    .insert({
+      user_id: userId,
+      metric: rule.metric,
+      channel: rule.channel,
+      comparison: rule.comparison,
+      threshold: rule.threshold,
+      timeframe: rule.timeframe,
+      description: rule.description
+    })
+    .select('id, metric, channel, comparison, threshold, timeframe, enabled, description, created_at')
+    .single();
+  if (error) fail(error, 'saving alert rule');
+  return assembleRule(data);
+}
+
+async function updateAlertRule(email, ruleId, enabled) {
+  const userId = await userIdFor(email);
+  const { error } = await db()
+    .from('alert_rules')
+    .update({ enabled })
+    .eq('id', ruleId)
+    .eq('user_id', userId); // scoped so one user can never touch another's rule
+  if (error) fail(error, 'updating alert rule');
+}
+
+async function deleteAlertRule(email, ruleId) {
+  const userId = await userIdFor(email);
+  const { error } = await db()
+    .from('alert_rules')
+    .delete()
+    .eq('id', ruleId)
+    .eq('user_id', userId);
+  if (error) fail(error, 'deleting alert rule');
+}
+
 // Persists the (mutated) user object. Provider rows are upserted and their
 // child rows replaced wholesale, which reproduces the Blobs semantics
 // exactly - e.g. reconnecting Meta replaces the whole provider object,
@@ -241,4 +318,15 @@ async function saveUser(user) {
   }
 }
 
-module.exports = { getUser, createUser, saveUser, setPassword, saveAiPrefs, saveAiInsight };
+module.exports = {
+  getUser,
+  createUser,
+  saveUser,
+  setPassword,
+  saveAiPrefs,
+  saveAiInsight,
+  listAlertRules,
+  createAlertRule,
+  updateAlertRule,
+  deleteAlertRule
+};

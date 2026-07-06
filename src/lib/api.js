@@ -104,6 +104,26 @@ export const api = {
     request('/.netlify/functions/disconnect-provider', {
       method: 'POST',
       body: JSON.stringify({ provider })
+    }),
+
+  assistantChat: (messages) =>
+    request('/.netlify/functions/assistant-chat', {
+      method: 'POST',
+      body: JSON.stringify({ messages })
+    }),
+
+  listAlerts: () => request('/.netlify/functions/list-alerts'),
+
+  updateAlert: (id, enabled) =>
+    request('/.netlify/functions/update-alert', {
+      method: 'POST',
+      body: JSON.stringify({ id, enabled })
+    }),
+
+  deleteAlert: (id) =>
+    request('/.netlify/functions/delete-alert', {
+      method: 'POST',
+      body: JSON.stringify({ id })
     })
 };
 

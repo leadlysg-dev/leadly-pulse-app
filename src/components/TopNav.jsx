@@ -4,6 +4,7 @@ import './TopNav.css';
 const TABS = [
   { to: '/dashboard.html', label: 'Dashboard' },
   { to: '/reports.html', label: 'Reports & Insights' },
+  { to: '/assistant.html', label: 'Assistant' },
   { to: '/settings.html', label: 'Settings' }
 ];
 

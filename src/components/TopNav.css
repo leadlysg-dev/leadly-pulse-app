@@ -24,6 +24,15 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  /* Four tabs don't fit a phone row - let the strip scroll sideways
+     instead of pushing "Log out" off the edge. */
+  overflow-x: auto;
+  scrollbar-width: none;
+  min-width: 0;
+}
+
+.top-nav-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .top-nav-tab {
