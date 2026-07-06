@@ -47,14 +47,14 @@ exports.handler = async (event) => {
     // two calls serve any metric selection.
     const [dailyRows, prevRows] = await Promise.all([
       metaGet(`${meta.selectedAdAccountId}/insights`, {
-        fields: 'spend,actions',
+        fields: 'spend,actions,impressions,clicks,action_values',
         time_range: JSON.stringify({ since, until }),
         time_increment: 1,
         limit: 100,
         access_token: meta.accessToken
       }),
       metaGet(`${meta.selectedAdAccountId}/insights`, {
-        fields: 'spend,actions',
+        fields: 'spend,actions,impressions,clicks,action_values',
         time_range: JSON.stringify({ since: prevSince, until: prevUntil }),
         access_token: meta.accessToken
       })
@@ -68,6 +68,9 @@ exports.handler = async (event) => {
     });
     const dates = listDays(since, until);
     const dailySpend = dates.map((d) => (byDate[d] ? +byDate[d].spend.toFixed(2) : 0));
+    const dailyImpressions = dates.map((d) => (byDate[d] ? byDate[d].impressions : 0));
+    const dailyClicks = dates.map((d) => (byDate[d] ? byDate[d].clicks : 0));
+    const dailyRevenue = dates.map((d) => (byDate[d] ? +byDate[d].revenue.toFixed(2) : 0));
 
     const totals = sumRows(dailyRows, metricIds);
     const prev = sumRows(prevRows, metricIds);
@@ -93,9 +96,23 @@ exports.handler = async (event) => {
       spend: +totals.spend.toFixed(2),
       metaSpend: +totals.spend.toFixed(2),
       googleSpend: 0,
-      previous: { spend: +prev.spend.toFixed(2) },
+      impressions: totals.impressions,
+      clicks: totals.clicks,
+      revenue: +totals.revenue.toFixed(2),
+      previous: {
+        spend: +prev.spend.toFixed(2),
+        impressions: prev.impressions,
+        clicks: prev.clicks,
+        revenue: +prev.revenue.toFixed(2)
+      },
       metrics,
-      daily: { dates, spend: dailySpend }
+      daily: {
+        dates,
+        spend: dailySpend,
+        impressions: dailyImpressions,
+        clicks: dailyClicks,
+        revenue: dailyRevenue
+      }
     });
   } catch (err) {
     return json(200, {

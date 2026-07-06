@@ -43,9 +43,12 @@ export default function TrendChart({ title, labels, values, color, formatValue =
           ` L ${pts[pts.length - 1].x} ${PAD.top + plotH} Z`
         : '';
 
+    // Not rounded: rate metrics (CTR, ROAS) have single-digit maxima where
+    // rounding the half tick would mislabel it. Dollar/count maxima are
+    // already whole numbers via niceMax, so their labels don't change.
     const ticks = [0, 0.5, 1].map((f) => ({
       y: PAD.top + plotH * (1 - f),
-      label: formatValue(Math.round(max * f))
+      label: formatValue(+(max * f).toFixed(2))
     }));
 
     return { linePath: line, areaPath: area, points: pts, yTicks: ticks };

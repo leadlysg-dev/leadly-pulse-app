@@ -5,6 +5,7 @@ import './styles/global.css';
 import { api } from './lib/api';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Reports from './pages/Reports';
 import SelectAccount from './pages/SelectAccount';
 import SelectMetrics from './pages/SelectMetrics';
 
@@ -39,6 +40,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             touching backend code, which is out of scope for this rebuild. */}
         <Route path="/login.html" element={<Login />} />
         <Route path="/dashboard.html" element={<Dashboard />} />
+        <Route path="/reports.html" element={<Reports />} />
         <Route path="/select-account.html" element={<SelectAccount />} />
         <Route path="/select-metrics.html" element={<SelectMetrics />} />
       </Routes>
