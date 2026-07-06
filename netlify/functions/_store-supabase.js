@@ -65,7 +65,7 @@ function assembleProvider(row) {
 async function getUser(email) {
   const { data: u, error } = await db()
     .from('users')
-    .select('id, email, password_hash, password_set_at, created_at, ai_prefs')
+    .select('id, email, password_hash, password_set_at, created_at, ai_prefs, ai_insight')
     .eq('email', email.toLowerCase())
     .maybeSingle();
   if (error) fail(error, 'loading user');
@@ -88,6 +88,7 @@ async function getUser(email) {
     passwordSetAt: u.password_set_at,
     createdAt: u.created_at,
     aiPrefs: u.ai_prefs,
+    aiInsight: u.ai_insight,
     accounts: {}
   };
   (accounts || []).forEach((row) => {
@@ -140,6 +141,14 @@ async function saveAiPrefs(email, prefs) {
     .update({ ai_prefs: prefs })
     .eq('email', email.toLowerCase());
   if (error) fail(error, 'saving AI preferences');
+}
+
+async function saveAiInsight(email, insight) {
+  const { error } = await db()
+    .from('users')
+    .update({ ai_insight: insight })
+    .eq('email', email.toLowerCase());
+  if (error) fail(error, 'saving AI insight');
 }
 
 // Persists the (mutated) user object. Provider rows are upserted and their
@@ -232,4 +241,4 @@ async function saveUser(user) {
   }
 }
 
-module.exports = { getUser, createUser, saveUser, setPassword, saveAiPrefs };
+module.exports = { getUser, createUser, saveUser, setPassword, saveAiPrefs, saveAiInsight };

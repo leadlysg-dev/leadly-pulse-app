@@ -51,6 +51,7 @@ module.exports = {
   saveUser: backend.saveUser,
   setPassword: backend.setPassword,
   saveAiPrefs: backend.saveAiPrefs,
+  saveAiInsight: backend.saveAiInsight,
   hasSetPassword,
   verifyPassword,
   createSessionCookie,

@@ -97,6 +97,9 @@ export const api = {
       body: JSON.stringify(prefs)
     }),
 
+  getAiInsights: (refresh = false) =>
+    request(`/.netlify/functions/get-ai-insights${refresh ? '?refresh=1' : ''}`),
+
   disconnectProvider: (provider) =>
     request('/.netlify/functions/disconnect-provider', {
       method: 'POST',

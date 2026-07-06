@@ -63,4 +63,13 @@ async function saveAiPrefs(email, prefs) {
   await store.setJSON(key, user);
 }
 
-module.exports = { getUser, createUser, saveUser, setPassword, saveAiPrefs };
+async function saveAiInsight(email, insight) {
+  const store = usersStore();
+  const key = email.toLowerCase();
+  const user = await store.get(key, { type: 'json' });
+  if (!user) throw new Error('User not found.');
+  user.aiInsight = insight;
+  await store.setJSON(key, user);
+}
+
+module.exports = { getUser, createUser, saveUser, setPassword, saveAiPrefs, saveAiInsight };
