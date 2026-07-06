@@ -209,7 +209,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--motion-fast);
 }
 
 .ai-group.is-disabled {
@@ -265,7 +265,7 @@
   border-radius: 999px;
   background: var(--gridline);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background-color var(--motion-fast), border-color var(--motion-fast);
 }
 
 .toggle:disabled {
@@ -285,7 +285,7 @@
   border-radius: 999px;
   background: var(--surface-2);
   box-shadow: var(--shadow-card);
-  transition: transform 0.15s ease;
+  transition: transform var(--motion-fast);
 }
 
 .toggle-on {
