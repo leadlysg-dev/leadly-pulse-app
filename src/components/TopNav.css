@@ -20,6 +20,32 @@
   font-size: 15px;
 }
 
+.top-nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.top-nav-tab {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.top-nav-tab:hover {
+  color: var(--text-primary);
+  background: var(--gridline);
+}
+
+.top-nav-tab.active {
+  color: var(--text-primary);
+  background: var(--gridline);
+  font-weight: 500;
+}
+
 .top-nav-actions {
   display: flex;
   align-items: center;
@@ -40,4 +66,21 @@
 .top-nav-logout:hover {
   color: var(--text-primary);
   text-decoration: underline;
+}
+
+/* Phones: the email is the least important thing in the bar - drop it so
+   the tabs stay tappable on one row. */
+@media (max-width: 560px) {
+  .top-nav-inner {
+    padding: 12px 14px;
+    gap: 8px;
+  }
+
+  .top-nav-email {
+    display: none;
+  }
+
+  .top-nav-brand span {
+    display: none;
+  }
 }

@@ -18,22 +18,51 @@ async function metaGet(path, params) {
   return json.data || [];
 }
 
-// Pulls spend plus each requested metric's value out of one insights row.
+// Purchase value lives in action_values under the same aliases the metrics
+// catalog uses for purchase counts. omni_purchase already aggregates the
+// pixel/app/shop variants, so we take the highest-priority alias the row
+// actually has - never summed, which would double-count.
+const PURCHASE_VALUE_ALIASES = [
+  'omni_purchase',
+  'purchase',
+  'offsite_conversion.fb_pixel_purchase',
+  'onsite_conversion.purchase',
+  'app_custom_event.fb_mobile_purchase'
+];
+
+function readRevenue(row) {
+  const actionValues = row.action_values || [];
+  for (const alias of PURCHASE_VALUE_ALIASES) {
+    const entry = actionValues.find((a) => a.action_type === alias);
+    if (entry) return Number(entry.value) || 0;
+  }
+  return 0;
+}
+
+// Pulls spend, delivery figures, purchase value, and each requested metric's
+// value out of one insights row. Rows fetched without the impressions/clicks/
+// action_values fields just read as 0.
 function readRow(row, metricIds) {
   return {
     spend: parseFloat(row.spend || 0),
+    impressions: parseInt(row.impressions || 0, 10),
+    clicks: parseInt(row.clicks || 0, 10),
+    revenue: readRevenue(row),
     values: extractValues(row, metricIds)
   };
 }
 
 function sumRows(rows, metricIds) {
-  const totals = { spend: 0, values: {} };
+  const totals = { spend: 0, impressions: 0, clicks: 0, revenue: 0, values: {} };
   metricIds.forEach((id) => {
     totals.values[id] = 0;
   });
   rows.forEach((row) => {
     const r = readRow(row, metricIds);
     totals.spend += r.spend;
+    totals.impressions += r.impressions;
+    totals.clicks += r.clicks;
+    totals.revenue += r.revenue;
     metricIds.forEach((id) => {
       totals.values[id] += r.values[id];
     });

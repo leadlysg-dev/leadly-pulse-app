@@ -23,3 +23,9 @@ export const pctChange = (current, previous) => {
   return ((current - previous) / previous) * 100;
 };
 
+// "3.4200000000000004" -> "3.42%" (CTR and other rates)
+export const percent = (v) => `${(+Number(v || 0).toFixed(2)).toLocaleString()}%`;
+
+// "2.5" -> "2.5x" (ROAS)
+export const multiple = (v) => `${+Number(v || 0).toFixed(2)}x`;
+

@@ -21,6 +21,15 @@ function demoDashboard(range) {
   const spendDaily = dates.map((_, i) => Math.round(112 + 30 * Math.sin(i / 4 + 1) + (i % 7) * 6));
   const totalSpend = spendDaily.reduce((a, b) => a + b, 0);
 
+  // Delivery + revenue follow spend with their own gentle waves, so the demo
+  // CTR sits around 3% and ROAS around 2x - believable, not flattering.
+  const impressionsDaily = spendDaily.map((s, i) => Math.round(s * (36 + 5 * Math.sin(i / 5))));
+  const clicksDaily = impressionsDaily.map((n, i) => Math.round(n * (0.028 + 0.006 * Math.sin(i / 6 + 2))));
+  const revenueDaily = spendDaily.map((s, i) => Math.round(s * (2.0 + 0.5 * Math.sin(i / 5 + 1))));
+  const totalImpressions = impressionsDaily.reduce((a, b) => a + b, 0);
+  const totalClicks = clicksDaily.reduce((a, b) => a + b, 0);
+  const totalRevenue = revenueDaily.reduce((a, b) => a + b, 0);
+
   const metrics = DEMO_METRICS.map((m, mi) => {
     const scale = mi === 0 ? 5 : 2;
     const daily = dates.map((_, i) => demoDay(i, scale, mi * 2));
@@ -49,9 +58,23 @@ function demoDashboard(range) {
     spend: totalSpend,
     metaSpend: Math.round(totalSpend * 0.63),
     googleSpend: Math.round(totalSpend * 0.37),
-    previous: { spend: Math.round(totalSpend * 0.97) },
+    impressions: totalImpressions,
+    clicks: totalClicks,
+    revenue: totalRevenue,
+    previous: {
+      spend: Math.round(totalSpend * 0.97),
+      impressions: Math.round(totalImpressions * 1.02),
+      clicks: Math.round(totalClicks * 0.93),
+      revenue: Math.round(totalRevenue * 0.9)
+    },
     metrics,
-    daily: { dates, spend: spendDaily }
+    daily: {
+      dates,
+      spend: spendDaily,
+      impressions: impressionsDaily,
+      clicks: clicksDaily,
+      revenue: revenueDaily
+    }
   };
 }
 
