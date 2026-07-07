@@ -30,6 +30,7 @@ exports.handler = async (event) => {
         !!meta && !!meta.selectedAdAccountId && !(meta.selectedMetrics && meta.selectedMetrics.length),
       googleConnected: !!google,
       googleNeedsPick: !!google && google.adAccounts.length > 1 && !google.selectedAdAccountId,
+      scSiteUrl: (google && google.selectedScSiteUrl) || null,
       // For the Settings page: "Change password" vs "Set password", and the
       // saved AI preferences (null until first saved).
       hasPassword: hasSetPassword(user),
