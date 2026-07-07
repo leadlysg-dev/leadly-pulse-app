@@ -36,7 +36,7 @@ exports.handler = async (event) => {
 
   try {
     const rows = await metaGet(`${meta.selectedAdAccountId}/insights`, {
-      fields: 'spend,actions',
+      fields: 'spend,actions,impressions,clicks,action_values',
       time_range: JSON.stringify({ since, until }),
       time_increment: 7,
       limit: 50,
@@ -49,6 +49,9 @@ exports.handler = async (event) => {
         start: row.date_start,
         end: row.date_stop,
         spend: +r.spend.toFixed(2),
+        impressions: r.impressions,
+        clicks: r.clicks,
+        revenue: +r.revenue.toFixed(2),
         values: r.values
       };
     });

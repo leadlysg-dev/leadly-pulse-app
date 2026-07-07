@@ -2,9 +2,9 @@ import { Link, useLocation } from 'react-router-dom';
 import './TopNav.css';
 
 const TABS = [
-  { to: '/dashboard.html', label: 'Dashboard' },
-  { to: '/reports.html', label: 'Reports & Insights' },
-  { to: '/assistant.html', label: 'Assistant' },
+  { to: '/pulse.html', label: 'Pulse' },
+  { to: '/reporting.html', label: 'Reporting' },
+  { to: '/creative.html', label: 'Creative' },
   { to: '/settings.html', label: 'Settings' }
 ];
 

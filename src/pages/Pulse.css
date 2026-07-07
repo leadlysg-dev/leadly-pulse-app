@@ -1,0 +1,70 @@
+/* Same page shell and rhythm as every other tab. */
+.pulse-page {
+  min-height: 100vh;
+  background: var(--page-plane);
+}
+
+.pulse-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pulse-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pulse-head h1 {
+  font-size: var(--text-page-title);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.pulse-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+  align-items: start;
+}
+
+.pulse-off {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pulse-off p {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pulse-off-sub {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.pulse-off-sub a,
+.pulse-main .banner a {
+  color: var(--series-1);
+}
+
+@media (max-width: 860px) {
+  .pulse-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .pulse-main {
+    padding: 16px 16px 48px;
+  }
+}

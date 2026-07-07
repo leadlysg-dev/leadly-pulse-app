@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import TopNav from '../components/TopNav';
 import ErrorState from '../components/ErrorState';
 import './Settings.css';
 
+// AI features are on by default - for new customers and for existing ones
+// who never saved preferences (the server treats never-saved the same way).
+// Only an explicitly saved "off" turns them off.
 const DEFAULT_AI_PREFS = {
-  enabled: false,
-  insights: { enabled: false, cadence: 'weekly', prompt: '' },
-  assistant: { enabled: false, instructions: '' }
+  enabled: true,
+  insights: { enabled: true, cadence: 'weekly', prompt: '' },
+  assistant: { enabled: true, instructions: '' }
 };
 
 function Toggle({ label, checked, onChange, disabled = false }) {
@@ -285,6 +289,33 @@ export default function Settings() {
                 />
               </div>
             </section>
+
+            {status.metaConnected && (
+              <section className="settings-section">
+                <h2>Data</h2>
+                <div className="card settings-card">
+                  <div className="settings-row">
+                    <div className="settings-row-copy">
+                      <span className="settings-row-label">Meta ad account</span>
+                      <span className="settings-hint">Which ad account AdPulse reports on.</span>
+                    </div>
+                    <Link className="btn btn-secondary" to="/select-account.html?provider=meta">
+                      Change
+                    </Link>
+                  </div>
+                  <div className="settings-divider" role="separator" />
+                  <div className="settings-row">
+                    <div className="settings-row-copy">
+                      <span className="settings-row-label">Tracked metrics</span>
+                      <span className="settings-hint">The conversions shown across Reporting and Pulse.</span>
+                    </div>
+                    <Link className="btn btn-secondary" to="/select-metrics.html?provider=meta">
+                      Edit
+                    </Link>
+                  </div>
+                </div>
+              </section>
+            )}
 
             <section className="settings-section">
               <h2>AI preferences</h2>

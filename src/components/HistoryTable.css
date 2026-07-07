@@ -1,0 +1,46 @@
+.history-table-card {
+  padding: 8px 20px;
+}
+
+.history-table-scroll {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.history-table th,
+.history-table td {
+  text-align: right;
+  padding: 8px;
+  border-bottom: 1px solid var(--gridline);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.history-table tbody tr:last-child th,
+.history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.history-table tbody tr {
+  transition: background-color var(--motion-fast);
+}
+
+.history-table tbody tr:hover {
+  background: color-mix(in srgb, var(--gridline) 35%, transparent);
+}
+
+.history-table thead th {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: var(--text-caption);
+}
+
+.history-table .history-col-week {
+  text-align: left;
+  font-weight: 500;
+}

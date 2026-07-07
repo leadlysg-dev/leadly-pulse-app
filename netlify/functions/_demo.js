@@ -26,9 +26,11 @@ function demoDashboard(range) {
   const impressionsDaily = spendDaily.map((s, i) => Math.round(s * (36 + 5 * Math.sin(i / 5))));
   const clicksDaily = impressionsDaily.map((n, i) => Math.round(n * (0.028 + 0.006 * Math.sin(i / 6 + 2))));
   const revenueDaily = spendDaily.map((s, i) => Math.round(s * (2.0 + 0.5 * Math.sin(i / 5 + 1))));
+  const lpvDaily = clicksDaily.map((c, i) => Math.round(c * (0.72 + 0.08 * Math.sin(i / 4))));
   const totalImpressions = impressionsDaily.reduce((a, b) => a + b, 0);
   const totalClicks = clicksDaily.reduce((a, b) => a + b, 0);
   const totalRevenue = revenueDaily.reduce((a, b) => a + b, 0);
+  const totalLpv = lpvDaily.reduce((a, b) => a + b, 0);
 
   const metrics = DEMO_METRICS.map((m, mi) => {
     const scale = mi === 0 ? 5 : 2;
@@ -60,11 +62,13 @@ function demoDashboard(range) {
     googleSpend: Math.round(totalSpend * 0.37),
     impressions: totalImpressions,
     clicks: totalClicks,
+    landingPageViews: totalLpv,
     revenue: totalRevenue,
     previous: {
       spend: Math.round(totalSpend * 0.97),
       impressions: Math.round(totalImpressions * 1.02),
       clicks: Math.round(totalClicks * 0.93),
+      landingPageViews: Math.round(totalLpv * 0.91),
       revenue: Math.round(totalRevenue * 0.9)
     },
     metrics,
@@ -73,6 +77,7 @@ function demoDashboard(range) {
       spend: spendDaily,
       impressions: impressionsDaily,
       clicks: clicksDaily,
+      landingPageViews: lpvDaily,
       revenue: revenueDaily
     }
   };
@@ -88,10 +93,15 @@ function demoHistory(weeks = 12) {
     const leads = Math.round(26 + 8 * Math.sin(n / 2) + n * 0.8);
     const purchases = Math.round(9 + 3 * Math.sin(n / 2.2 + 1) + n * 0.3);
     const spend = Math.round(760 + 90 * Math.sin(n / 2.5) + n * 14);
+    const impressions = Math.round(spend * 37);
+    const clicks = Math.round(impressions * 0.03);
     list.push({
       start: start.toISOString().slice(0, 10),
       end: end.toISOString().slice(0, 10),
       spend,
+      impressions,
+      clicks,
+      revenue: Math.round(spend * 2.1),
       values: { lead: leads, purchase: purchases }
     });
   }

@@ -10,7 +10,7 @@
 // them "coming soon". Falls back to labelled demo data if the customer
 // hasn't connected an account yet, so the dashboard never looks broken.
 const { getEmailFromRequest, getUser } = require('./_store');
-const { VALID_RANGES, resolveRange, listDays } = require('./_dates');
+const { VALID_RANGES, resolveRange, resolveCustomRange, listDays } = require('./_dates');
 const { metaGet, readRow, sumRows, costPer } = require('./_meta');
 const { getSelectedMetrics } = require('./_metrics');
 const { demoDashboard } = require('./_demo');
@@ -26,7 +26,9 @@ exports.handler = async (event) => {
   if (!email) return json(401, { error: 'Not logged in.' });
 
   const qs = event.queryStringParameters || {};
-  const range = VALID_RANGES.includes(qs.range) ? qs.range : 'last_30d';
+  // A valid explicit since/until pair (custom picker) wins over named ranges.
+  const custom = resolveCustomRange(qs.since, qs.until);
+  const range = custom ? 'custom' : VALID_RANGES.includes(qs.range) ? qs.range : 'last_30d';
 
   const user = await getUser(email);
   const meta = user.accounts.meta;
@@ -38,7 +40,11 @@ exports.handler = async (event) => {
 
   const selectedMetrics = getSelectedMetrics(meta);
   const metricIds = selectedMetrics.map((m) => m.id);
-  const { since, until, prevSince, prevUntil } = resolveRange(range);
+  // landing_page_view rides along in the same actions array Meta already
+  // returns - extracting it costs nothing extra.
+  const LPV = 'landing_page_view';
+  const extractIds = [...metricIds, LPV];
+  const { since, until, prevSince, prevUntil } = custom || resolveRange(range);
 
   try {
     // One call with a daily breakdown covers both the charts and the period
@@ -64,16 +70,17 @@ exports.handler = async (event) => {
     // the charts show a continuous timeline.
     const byDate = {};
     dailyRows.forEach((row) => {
-      byDate[row.date_start] = readRow(row, metricIds);
+      byDate[row.date_start] = readRow(row, extractIds);
     });
     const dates = listDays(since, until);
     const dailySpend = dates.map((d) => (byDate[d] ? +byDate[d].spend.toFixed(2) : 0));
     const dailyImpressions = dates.map((d) => (byDate[d] ? byDate[d].impressions : 0));
     const dailyClicks = dates.map((d) => (byDate[d] ? byDate[d].clicks : 0));
     const dailyRevenue = dates.map((d) => (byDate[d] ? +byDate[d].revenue.toFixed(2) : 0));
+    const dailyLpv = dates.map((d) => (byDate[d] ? byDate[d].values[LPV] : 0));
 
-    const totals = sumRows(dailyRows, metricIds);
-    const prev = sumRows(prevRows, metricIds);
+    const totals = sumRows(dailyRows, extractIds);
+    const prev = sumRows(prevRows, extractIds);
 
     const metrics = selectedMetrics.map((m) => ({
       id: m.id,
@@ -98,11 +105,13 @@ exports.handler = async (event) => {
       googleSpend: 0,
       impressions: totals.impressions,
       clicks: totals.clicks,
+      landingPageViews: totals.values[LPV],
       revenue: +totals.revenue.toFixed(2),
       previous: {
         spend: +prev.spend.toFixed(2),
         impressions: prev.impressions,
         clicks: prev.clicks,
+        landingPageViews: prev.values[LPV],
         revenue: +prev.revenue.toFixed(2)
       },
       metrics,
@@ -111,6 +120,7 @@ exports.handler = async (event) => {
         spend: dailySpend,
         impressions: dailyImpressions,
         clicks: dailyClicks,
+        landingPageViews: dailyLpv,
         revenue: dailyRevenue
       }
     });
