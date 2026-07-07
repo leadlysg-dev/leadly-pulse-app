@@ -42,7 +42,13 @@ export default function TopNav({ email }) {
           ))}
         </nav>
         <div className="top-nav-actions">
-          {email && <span className="top-nav-email">{email}</span>}
+          {/* Until the session check answers, hold the email's spot with a
+              same-height placeholder so the bar doesn't reflow on load. */}
+          {email ? (
+            <span className="top-nav-email">{email}</span>
+          ) : (
+            <span className="skeleton top-nav-email-skeleton" aria-hidden="true" />
+          )}
           <a className="top-nav-logout" href="/.netlify/functions/logout">
             Log out
           </a>

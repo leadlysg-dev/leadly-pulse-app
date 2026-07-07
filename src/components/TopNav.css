@@ -67,6 +67,32 @@
   color: var(--text-secondary);
 }
 
+.top-nav-email-skeleton {
+  width: 140px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+/* On wide screens the brand and actions flex equally, so the tab strip sits
+   in a stable center regardless of how long the email turns out to be. */
+@media (min-width: 561px) {
+  .top-nav-brand,
+  .top-nav-actions {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .top-nav-actions {
+    justify-content: flex-end;
+  }
+
+  .top-nav-email {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
 .top-nav-logout {
   font-size: var(--text-sm);
   color: var(--text-secondary);
@@ -87,7 +113,8 @@
     gap: 8px;
   }
 
-  .top-nav-email {
+  .top-nav-email,
+  .top-nav-email-skeleton {
     display: none;
   }
 
