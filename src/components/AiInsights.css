@@ -80,6 +80,14 @@
 }
 
 .ai-insights-unavailable {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ai-insights-unavailable p {
   font-size: 13px;
   color: var(--text-muted);
 }
