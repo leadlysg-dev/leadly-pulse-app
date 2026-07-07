@@ -303,6 +303,22 @@ export default function Settings() {
                       Change
                     </Link>
                   </div>
+                  {status.googleConnected && (
+                    <>
+                      <div className="settings-divider" role="separator" />
+                      <div className="settings-row">
+                        <div className="settings-row-copy">
+                          <span className="settings-row-label">Search Console property</span>
+                          <span className="settings-hint">
+                            {status.scSiteUrl || 'Not selected yet — pick one on the SEO tab.'}
+                          </span>
+                        </div>
+                        <Link className="btn btn-secondary" to="/seo.html">
+                          {status.scSiteUrl ? 'View' : 'Choose'}
+                        </Link>
+                      </div>
+                    </>
+                  )}
                   <div className="settings-divider" role="separator" />
                   <div className="settings-row">
                     <div className="settings-row-copy">

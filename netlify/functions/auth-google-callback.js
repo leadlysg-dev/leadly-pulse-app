@@ -3,6 +3,7 @@
 // to track - same pattern as the Meta callback.
 const fetch = require('node-fetch');
 const { getUser, saveUser } = require('./_store');
+const { listScProperties } = require('./_google');
 
 exports.handler = async (event) => {
   const { code, state: email } = event.queryStringParameters || {};
@@ -42,6 +43,16 @@ exports.handler = async (event) => {
     adAccounts = [];
   }
 
+  // Same token also covers Search Console (webmasters.readonly is part of
+  // the consent) - list the customer's properties for the SEO tab's picker.
+  let scProperties = [];
+  try {
+    const sc = await listScProperties({ accessToken: tokenData.access_token });
+    scProperties = sc.properties || [];
+  } catch {
+    scProperties = [];
+  }
+
   const user = await getUser(email);
   if (!user) return { statusCode: 401, body: 'Session expired. Please log in again.' };
 
@@ -50,6 +61,8 @@ exports.handler = async (event) => {
     refreshToken: tokenData.refresh_token,
     adAccounts,
     selectedAdAccountId: adAccounts.length === 1 ? adAccounts[0].id : null,
+    scProperties,
+    selectedScSiteUrl: scProperties.length === 1 ? scProperties[0].siteUrl : null,
     connectedAt: new Date().toISOString()
   };
   await saveUser(user);

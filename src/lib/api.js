@@ -115,6 +115,14 @@ export const api = {
       body: JSON.stringify({ provider })
     }),
 
+  getSeo: (view) => request(`/.netlify/functions/get-seo?${viewQuery(view)}`),
+
+  selectScProperty: (siteUrl) =>
+    request('/.netlify/functions/select-sc-property', {
+      method: 'POST',
+      body: JSON.stringify({ siteUrl })
+    }),
+
   assistantChat: (messages) =>
     request('/.netlify/functions/assistant-chat', {
       method: 'POST',
