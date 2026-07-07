@@ -65,7 +65,7 @@ function assembleProvider(row) {
 async function getUser(email) {
   const { data: u, error } = await db()
     .from('users')
-    .select('id, email, password_hash, password_set_at, created_at, ai_prefs, ai_insight')
+    .select('id, email, password_hash, password_set_at, created_at, ai_prefs')
     .eq('email', email.toLowerCase())
     .maybeSingle();
   if (error) fail(error, 'loading user');
@@ -88,7 +88,6 @@ async function getUser(email) {
     passwordSetAt: u.password_set_at,
     createdAt: u.created_at,
     aiPrefs: u.ai_prefs,
-    aiInsight: u.ai_insight,
     accounts: {}
   };
   (accounts || []).forEach((row) => {
@@ -143,12 +142,41 @@ async function saveAiPrefs(email, prefs) {
   if (error) fail(error, 'saving AI preferences');
 }
 
-async function saveAiInsight(email, insight) {
+// Per-view insight cache: one row per (user, dashboard range), upserted.
+async function getAiInsightCache(email, range) {
+  const userId = await userIdFor(email);
+  const { data, error } = await db()
+    .from('ai_insight_cache')
+    .select('prefs_hash, data_hash, summary, generated_at')
+    .eq('user_id', userId)
+    .eq('range', range)
+    .maybeSingle();
+  if (error) fail(error, 'loading insight cache');
+  if (!data) return null;
+  return {
+    prefsHash: data.prefs_hash,
+    dataHash: data.data_hash,
+    summary: data.summary,
+    generatedAt: data.generated_at
+  };
+}
+
+async function saveAiInsightCache(email, range, entry) {
+  const userId = await userIdFor(email);
   const { error } = await db()
-    .from('users')
-    .update({ ai_insight: insight })
-    .eq('email', email.toLowerCase());
-  if (error) fail(error, 'saving AI insight');
+    .from('ai_insight_cache')
+    .upsert(
+      {
+        user_id: userId,
+        range,
+        prefs_hash: entry.prefsHash,
+        data_hash: entry.dataHash,
+        summary: entry.summary,
+        generated_at: entry.generatedAt
+      },
+      { onConflict: 'user_id,range' }
+    );
+  if (error) fail(error, 'saving insight cache');
 }
 
 // --- Alert rules (created by the AI assistant) ---
@@ -324,7 +352,8 @@ module.exports = {
   saveUser,
   setPassword,
   saveAiPrefs,
-  saveAiInsight,
+  getAiInsightCache,
+  saveAiInsightCache,
   listAlertRules,
   createAlertRule,
   updateAlertRule,

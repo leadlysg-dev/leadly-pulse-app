@@ -184,7 +184,7 @@ export default function Dashboard() {
 
         {statusError && <ErrorState message={statusError} onRetry={loadStatus} />}
 
-        <AiInsights />
+        <AiInsights range={range} />
 
         {data?.isDemo && data?.error && <Banner tone="warning">{data.error}</Banner>}
         {data?.isDemo && !data?.error && (
