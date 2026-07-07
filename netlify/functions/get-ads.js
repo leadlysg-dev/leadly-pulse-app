@@ -4,7 +4,7 @@
 // one for the active ads' creatives, joined by ad id. ads_read covers both.
 // Demo data when no account is connected.
 const { getEmailFromRequest, getUser } = require('./_store');
-const { VALID_RANGES, resolveRange } = require('./_dates');
+const { VALID_RANGES, resolveRange, resolveCustomRange } = require('./_dates');
 const { metaGet, readRow } = require('./_meta');
 const { getSelectedMetrics } = require('./_metrics');
 const { demoAds } = require('./_demo');
@@ -20,7 +20,8 @@ exports.handler = async (event) => {
   if (!email) return json(401, { error: 'Not logged in.' });
 
   const qs = event.queryStringParameters || {};
-  const range = VALID_RANGES.includes(qs.range) ? qs.range : 'last_30d';
+  const custom = resolveCustomRange(qs.since, qs.until);
+  const range = custom ? 'custom' : VALID_RANGES.includes(qs.range) ? qs.range : 'last_30d';
 
   const user = await getUser(email);
   const meta = user.accounts.meta;
@@ -30,12 +31,12 @@ exports.handler = async (event) => {
 
   const selectedMetrics = getSelectedMetrics(meta);
   const metricIds = selectedMetrics.map((m) => m.id);
-  const { since, until } = resolveRange(range);
+  const { since, until } = custom || resolveRange(range);
 
   try {
     const [adRows, insightRows] = await Promise.all([
       metaGet(`${meta.selectedAdAccountId}/ads`, {
-        fields: 'id,name,effective_status,creative{thumbnail_url,title,body}',
+        fields: 'id,name,effective_status,creative{thumbnail_url,image_url,title,body}',
         effective_status: JSON.stringify(['ACTIVE']),
         limit: 50,
         access_token: meta.accessToken
@@ -66,6 +67,7 @@ exports.handler = async (event) => {
           headline: creative.title || null,
           body: creative.body || null,
           thumbnailUrl: creative.thumbnail_url || null,
+          imageUrl: creative.image_url || null,
           spend: +m.spend.toFixed(2),
           values: m.values
         };

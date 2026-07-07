@@ -29,3 +29,50 @@
   color: var(--surface-1);
   font-weight: 500;
 }
+
+/* Custom window: explicit start/end dates below the preset pills. */
+.range-picker-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.range-custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.range-custom input[type='date'] {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  transition: border-color var(--motion-fast);
+}
+
+.range-custom input[type='date']:focus {
+  outline: 2px solid var(--series-1);
+  outline-offset: 1px;
+}
+
+.range-custom-sep {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.range-custom-apply {
+  font-size: 13px;
+  padding: 6px 16px;
+}
+
+@media (max-width: 560px) {
+  .range-picker-wrap {
+    align-items: stretch;
+  }
+}

@@ -2,6 +2,13 @@
 // method, body shape, and cookie-based session stays exactly as the backend
 // expects - this only adds consistent error handling for the UI.
 
+// A "view" is either a named range ('last_7d', ...) or a custom
+// { since, until } pair from the date picker.
+const viewQuery = (view) =>
+  typeof view === 'string'
+    ? `range=${encodeURIComponent(view)}`
+    : `since=${encodeURIComponent(view.since)}&until=${encodeURIComponent(view.until)}`;
+
 class ApiError extends Error {
   constructor(message, status) {
     super(message);
@@ -43,12 +50,12 @@ async function request(path, options = {}) {
 export const api = {
   getStatus: () => request('/.netlify/functions/get-status'),
 
-  getDashboardData: (range) =>
-    request(`/.netlify/functions/get-dashboard-data?range=${encodeURIComponent(range)}`),
+  getDashboardData: (view) =>
+    request(`/.netlify/functions/get-dashboard-data?${viewQuery(view)}`),
 
   getHistory: () => request('/.netlify/functions/get-history'),
 
-  getAds: (range) => request(`/.netlify/functions/get-ads?range=${encodeURIComponent(range)}`),
+  getAds: (view) => request(`/.netlify/functions/get-ads?${viewQuery(view)}`),
 
   listAccounts: () => request('/.netlify/functions/list-accounts'),
 
@@ -97,8 +104,10 @@ export const api = {
       body: JSON.stringify(prefs)
     }),
 
-  getAiInsights: (refresh = false) =>
-    request(`/.netlify/functions/get-ai-insights${refresh ? '?refresh=1' : ''}`),
+  getAiInsights: (range, refresh = false) =>
+    request(
+      `/.netlify/functions/get-ai-insights?range=${encodeURIComponent(range)}${refresh ? '&refresh=1' : ''}`
+    ),
 
   disconnectProvider: (provider) =>
     request('/.netlify/functions/disconnect-provider', {

@@ -63,13 +63,17 @@ async function saveAiPrefs(email, prefs) {
   await store.setJSON(key, user);
 }
 
-async function saveAiInsight(email, insight) {
+// Per-view insight cache: a small map keyed by dashboard range.
+async function getAiInsightCache(email, range) {
   const store = usersStore();
-  const key = email.toLowerCase();
-  const user = await store.get(key, { type: 'json' });
-  if (!user) throw new Error('User not found.');
-  user.aiInsight = insight;
-  await store.setJSON(key, user);
+  const user = await store.get(email.toLowerCase(), { type: 'json' });
+  return (user && user.aiInsightCache && user.aiInsightCache[range]) || null;
+}
+
+async function saveAiInsightCache(email, range, entry) {
+  await withUser(email, (user) => {
+    user.aiInsightCache = { ...(user.aiInsightCache || {}), [range]: entry };
+  });
 }
 
 // --- Alert rules: stored as an array on the user blob ---
@@ -123,7 +127,8 @@ module.exports = {
   saveUser,
   setPassword,
   saveAiPrefs,
-  saveAiInsight,
+  getAiInsightCache,
+  saveAiInsightCache,
   listAlertRules,
   createAlertRule,
   updateAlertRule,

@@ -1,0 +1,212 @@
+/* Same page shell and 24px rhythm as every other tab. */
+.creative-page {
+  min-height: 100vh;
+  background: var(--page-plane);
+}
+
+.creative-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.creative-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.creative-head h1 {
+  font-size: var(--text-page-title);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.creative-body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  transition: opacity var(--motion-fast);
+}
+
+.creative-body.is-refreshing {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.creative-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.creative-section h2 {
+  font-size: var(--text-section);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Performance table */
+.creative-table-card {
+  padding: 8px 20px;
+}
+
+.creative-table-scroll {
+  overflow-x: auto;
+}
+
+.creative-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.creative-table th,
+.creative-table td {
+  text-align: right;
+  padding: 8px;
+  border-bottom: 1px solid var(--gridline);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.creative-table tbody tr:last-child th,
+.creative-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.creative-table tbody tr {
+  transition: background-color var(--motion-fast);
+}
+
+.creative-table tbody tr:hover {
+  background: color-mix(in srgb, var(--gridline) 35%, transparent);
+}
+
+.creative-table thead th {
+  font-size: var(--text-caption);
+}
+
+.creative-table thead button {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: var(--text-caption);
+  cursor: pointer;
+  transition: color var(--motion-fast);
+}
+
+.creative-table thead button:hover {
+  color: var(--text-primary);
+}
+
+.creative-table .creative-col-name {
+  text-align: left;
+  font-weight: 500;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ad previews: a highlight reel, not a cramped list. */
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.preview-card {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-image {
+  width: 100%;
+  aspect-ratio: 1.91 / 1; /* Meta's link-ad ratio */
+  object-fit: cover;
+  display: block;
+}
+
+.preview-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--series-1) 8%, var(--surface-2));
+  color: var(--series-1);
+}
+
+.preview-copy {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.preview-name {
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-headline {
+  font-size: var(--text-card-title);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.preview-body {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.preview-stats {
+  margin-top: 8px;
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Loading */
+.creative-loading {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.creative-skeleton-row {
+  height: 36px;
+}
+
+@media (max-width: 860px) {
+  .preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .preview-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .creative-main {
+    padding: 16px 16px 48px;
+  }
+}
