@@ -1,5 +1,11 @@
-import { fmtDate, money, multiple, number, percent } from '../lib/format';
+import { fmtDate, money, number, percent } from '../lib/format';
 import './HistoryTable.css';
+
+// "Leads" -> "lead"; multi-word labels keep their natural plural.
+const costPerLabel = (label) => {
+  const lower = label.toLowerCase();
+  return lower.split(' ').length === 1 ? lower.replace(/s$/, '') : lower;
+};
 
 // Week-by-week core metrics, newest first - scannable past performance
 // without touching the date picker.
@@ -23,8 +29,7 @@ export default function HistoryTable({ history }) {
               {metrics.map((m) => (
                 <th scope="col" key={m.id}>{m.label}</th>
               ))}
-              {primary && <th scope="col">Cost / {primary.label.toLowerCase().replace(/s$/, '')}</th>}
-              <th scope="col">ROAS</th>
+              {primary && <th scope="col">Cost / {costPerLabel(primary.label)}</th>}
             </tr>
           </thead>
           <tbody>
@@ -32,7 +37,6 @@ export default function HistoryTable({ history }) {
               const ctr = w.impressions > 0 ? (w.clicks / w.impressions) * 100 : null;
               const primaryCount = primary ? w.values?.[primary.id] || 0 : 0;
               const costPer = primary && primaryCount > 0 ? w.spend / primaryCount : null;
-              const roas = w.spend > 0 && w.revenue > 0 ? w.revenue / w.spend : null;
               return (
                 <tr key={w.start}>
                   <th scope="row" className="history-col-week">
@@ -46,7 +50,6 @@ export default function HistoryTable({ history }) {
                     <td key={m.id}>{number(w.values?.[m.id] || 0)}</td>
                   ))}
                   {primary && <td>{costPer === null ? '—' : money(costPer)}</td>}
-                  <td>{roas === null ? '—' : multiple(roas)}</td>
                 </tr>
               );
             })}
