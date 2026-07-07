@@ -49,12 +49,12 @@ async function buildSummary(meta, range) {
 
   const [rows, prevRows, adRows] = await Promise.all([
     metaGet(`${meta.selectedAdAccountId}/insights`, {
-      fields: 'spend,actions,impressions,clicks,action_values',
+      fields: 'spend,actions,impressions,clicks',
       time_range: JSON.stringify({ since, until }),
       access_token: meta.accessToken
     }),
     metaGet(`${meta.selectedAdAccountId}/insights`, {
-      fields: 'spend,actions,impressions,clicks,action_values',
+      fields: 'spend,actions,impressions,clicks',
       time_range: JSON.stringify({ since: prevSince, until: prevUntil }),
       access_token: meta.accessToken
     }),
@@ -75,8 +75,6 @@ async function buildSummary(meta, range) {
     impressions: t.impressions,
     clicks: t.clicks,
     ctrPct: t.impressions > 0 ? +((t.clicks / t.impressions) * 100).toFixed(2) : null,
-    revenue: +t.revenue.toFixed(2),
-    roas: t.spend > 0 && t.revenue > 0 ? +(t.revenue / t.spend).toFixed(2) : null,
     results: selectedMetrics.map((m) => ({
       metric: m.label,
       count: t.values[m.id],
@@ -120,7 +118,7 @@ Rules:
 - Always use the real numbers from the data: dollar amounts, counts, percentages. Amounts are in the account currency; write them with $.
 - The data covers the date range the customer selected (currentPeriod). Compare it to previousPeriod and say what changed, what's working, and what needs attention. Name the period naturally from its dates (e.g. "the last 7 days", "this month so far") - never call it something longer or shorter than it is.
 - Structure: 2-3 sentences of overview first, then 2-4 bullet takeaways. Each bullet starts with "- " on its own line. No headings, no markdown other than the bullets.
-- If a metric is null or zero, don't invent it - either skip it or say it plainly (e.g. "no purchase value was recorded").
+- If a metric is null or zero, don't invent it - either skip it or say it plainly (e.g. "no leads were recorded").
 - Keep the whole thing under 160 words.`;
 
 async function generate(summaryData, focus) {
@@ -171,9 +169,24 @@ exports.handler = async (event) => {
   }
 
   const fHash = prefsHash(focus);
-  const stored = await getAiInsightCache(email, range);
+  // The cache is an optimization, never a dependency: if the table is
+  // missing or the read fails, log it and generate fresh anyway.
+  let stored = null;
+  try {
+    stored = await getAiInsightCache(email, range);
+  } catch (err) {
+    console.error(`[get-ai-insights] cache read failed (continuing uncached): ${err.message}`);
+  }
   const cached = stored && stored.prefsHash === fHash ? stored : null;
   const ageMs = cached ? Date.now() - new Date(cached.generatedAt).getTime() : Infinity;
+
+  const writeCache = async (email, range, entry) => {
+    try {
+      await saveAiInsightCache(email, range, entry);
+    } catch (err) {
+      console.error(`[get-ai-insights] cache write failed (summary still served): ${err.message}`);
+    }
+  };
 
   const respond = (summary, generatedAt, extra = {}) =>
     json(200, { enabled: true, available: true, range, summary, generatedAt, ...extra });
@@ -197,23 +210,28 @@ exports.handler = async (event) => {
     // skip the Anthropic call entirely.
     if (cached && cached.dataHash === hash) {
       const entry = { prefsHash: fHash, dataHash: hash, summary: cached.summary, generatedAt: new Date().toISOString() };
-      await saveAiInsightCache(email, range, entry);
+      await writeCache(email, range, entry);
       return respond(entry.summary, entry.generatedAt, { cached: true });
     }
 
     if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('[get-ai-insights] ANTHROPIC_API_KEY is not set for this function');
       if (cached) return respond(cached.summary, cached.generatedAt, { cached: true, stale: true });
       return json(200, { enabled: true, available: false, reason: 'unavailable' });
     }
 
     const summary = await generate(summaryData, focus);
     const entry = { prefsHash: fHash, dataHash: hash, summary, generatedAt: new Date().toISOString() };
-    await saveAiInsightCache(email, range, entry);
+    await writeCache(email, range, entry);
     return respond(summary, entry.generatedAt, { cached: false });
   } catch (err) {
-    // Meta or Anthropic trouble: fall back to the last saved summary for
-    // this view if one exists, otherwise degrade gracefully - never a 500
-    // that would break the dashboard.
+    // Meta or Anthropic trouble: log the real error (the Anthropic SDK's
+    // typed errors carry status + name), then fall back to the last saved
+    // summary for this view if one exists - never a 500 that would break
+    // the page.
+    console.error(
+      `[get-ai-insights] generation failed: status=${err.status || 'n/a'} ${err.name}: ${err.message}`
+    );
     if (cached) {
       return respond(cached.summary, cached.generatedAt, { cached: true, stale: true });
     }

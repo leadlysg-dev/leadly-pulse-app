@@ -135,9 +135,19 @@ export default function AiInsights({ range }) {
       )}
 
       {!loading && (failed || data?.available === false) && (
-        <p className="ai-insights-unavailable">
-          Insights unavailable right now. Your numbers below are unaffected — try again later.
-        </p>
+        <div className="ai-insights-unavailable">
+          <p>Insights are temporarily unavailable — your numbers below are unaffected.</p>
+          <button
+            type="button"
+            className="ai-insights-refresh"
+            onClick={() => {
+              setLoading(true);
+              load(range, {});
+            }}
+          >
+            Try again
+          </button>
+        </div>
       )}
 
       {!loading && data?.available && (

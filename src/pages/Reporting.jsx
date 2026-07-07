@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../lib/api';
-import { fmtDate, money, multiple, number, pctChange, percent } from '../lib/format';
+import { fmtDate, money, number, pctChange, percent } from '../lib/format';
 import TopNav from '../components/TopNav';
 import DateRangePicker from '../components/DateRangePicker';
 import KpiCard from '../components/KpiCard';
@@ -28,9 +28,17 @@ function dailyRatio(numerators, denominators, scale = 1) {
   });
 }
 
-// The full-funnel card lineup, in funnel order: delivery -> engagement ->
-// conversion -> money. Each card carries the daily series and formatter the
-// trend chart uses when it's selected.
+// "Leads" -> "lead", but multi-word labels stay as-is ("Messaging
+// conversations started" reads wrong with its trailing s clipped).
+function costPerLabel(label) {
+  const lower = label.toLowerCase();
+  return lower.split(' ').length === 1 ? lower.replace(/s$/, '') : lower;
+}
+
+// Exactly 8 cards in a fixed category order: money in, then delivery, then
+// engagement, then what the customer pays per result on THEIR tracked
+// metric, then raw result counts. Each card carries the daily series and
+// formatter the trend chart uses when it's selected.
 function buildCards(data) {
   const prev = data.previous || {};
   const d = data.daily || {};
@@ -41,10 +49,44 @@ function buildCards(data) {
   const prevCtr = prev.impressions > 0 ? (prev.clicks / prev.impressions) * 100 : null;
   const cpc = data.clicks > 0 ? data.spend / data.clicks : null;
   const prevCpc = prev.clicks > 0 ? prev.spend / prev.clicks : null;
-  const roas = data.spend > 0 && data.revenue > 0 ? data.revenue / data.spend : null;
-  const prevRoas = prev.spend > 0 && prev.revenue > 0 ? prev.revenue / prev.spend : null;
 
-  const cards = [
+  // The last two slots are raw event counts: the customer's tracked metrics
+  // first, padded with landing page views when fewer than two are tracked.
+  const countCards = [
+    ...metrics.map((m) => ({
+      id: `metric:${m.id}`,
+      label: m.label,
+      valueText: number(m.value),
+      pct: pctChange(m.value, m.previous),
+      goodUp: true,
+      series: m.daily,
+      fmt: number,
+      color: 'var(--series-1)',
+      metric: m
+    })),
+    {
+      id: 'lpv',
+      label: 'Landing page views',
+      valueText: number(data.landingPageViews || 0),
+      pct: pctChange(data.landingPageViews, prev.landingPageViews),
+      goodUp: true,
+      series: d.landingPageViews || [],
+      fmt: number,
+      color: 'var(--series-1)'
+    }
+  ].slice(0, 2);
+
+  return [
+    {
+      id: 'spend',
+      label: 'Ad spend',
+      valueText: money(data.spend),
+      pct: pctChange(data.spend, prev.spend),
+      goodUp: null,
+      series: d.spend,
+      fmt: money,
+      color: 'var(--series-8)'
+    },
     {
       id: 'impressions',
       label: 'Impressions',
@@ -85,30 +127,9 @@ function buildCards(data) {
       fmt: money,
       color: 'var(--series-8)'
     },
-    {
-      id: 'lpv',
-      label: 'Landing page views',
-      valueText: number(data.landingPageViews || 0),
-      pct: pctChange(data.landingPageViews, prev.landingPageViews),
-      goodUp: true,
-      series: d.landingPageViews || [],
-      fmt: number,
-      color: 'var(--series-1)'
-    },
-    ...metrics.map((m) => ({
-      id: `metric:${m.id}`,
-      label: m.label,
-      valueText: number(m.value),
-      pct: pctChange(m.value, m.previous),
-      goodUp: true,
-      series: m.daily,
-      fmt: number,
-      color: 'var(--series-1)',
-      metric: m
-    })),
     primary && {
       id: 'costper',
-      label: `Cost per ${primary.label.toLowerCase().replace(/s$/, '')}`,
+      label: `Cost per ${costPerLabel(primary.label)}`,
       valueText: primary.costPer > 0 ? money(primary.costPer) : '—',
       pct: primary.costPer > 0 ? pctChange(primary.costPer, primary.prevCostPer) : null,
       goodUp: false,
@@ -116,29 +137,8 @@ function buildCards(data) {
       fmt: money,
       color: 'var(--series-8)'
     },
-    {
-      id: 'spend',
-      label: 'Ad spend',
-      valueText: money(data.spend),
-      pct: pctChange(data.spend, prev.spend),
-      goodUp: null,
-      series: d.spend,
-      fmt: money,
-      color: 'var(--series-8)'
-    },
-    {
-      id: 'roas',
-      label: 'ROAS',
-      valueText: roas === null ? '—' : multiple(roas),
-      pct: roas === null ? null : pctChange(roas, prevRoas),
-      goodUp: true,
-      series: dailyRatio(d.revenue, d.spend),
-      fmt: multiple,
-      color: 'var(--series-2)'
-    }
+    ...countCards
   ].filter(Boolean);
-
-  return cards;
 }
 
 export default function Reporting() {
