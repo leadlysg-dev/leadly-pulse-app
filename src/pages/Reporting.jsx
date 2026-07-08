@@ -10,11 +10,6 @@ import DashboardSkeleton from '../components/DashboardSkeleton';
 import { StackedBarChart, DonutChart, PairedTrendChart, Spark } from '../components/report/ReportCharts';
 import './Reporting.css';
 
-const TYPES = [
-  { value: 'all', label: 'All' },
-  { value: 'leads', label: 'Leads' },
-  { value: 'ba', label: 'Brand Awareness' }
-];
 const CHANNELS = [
   { value: 'all', label: 'All' },
   { value: 'meta', label: 'Meta' },
@@ -109,7 +104,6 @@ function Tile({ label, value, sub, spark, color }) {
 
 export default function Reporting() {
   const [view, setView] = useState('last_7d');
-  const [type, setType] = useState('all');
   const [channel, setChannel] = useState('all');
 
   const [status, setStatus] = useState(null);
@@ -182,7 +176,7 @@ export default function Reporting() {
 
   const initialLoading = data === null && !dataError;
   const channels = channel === 'all' ? ALL_CHANNELS : [channel];
-  const types = type === 'all' ? ALL_TYPES : [type];
+  const types = ALL_TYPES;
 
   let body = null;
   if (data) {
@@ -217,8 +211,8 @@ export default function Reporting() {
 
     const chartLabels = data.dates.map(fmtDate);
     const spendSeries = [
-      ...(types.includes('ba') ? [{ label: 'Brand Awareness', color: BA_COLOR, values: baSpendDaily }] : []),
-      ...(types.includes('leads') ? [{ label: 'Leads', color: LEADS_COLOR, values: leadsSpendDaily }] : [])
+      { label: 'Brand Awareness', color: BA_COLOR, values: baSpendDaily },
+      { label: 'Leads', color: LEADS_COLOR, values: leadsSpendDaily }
     ];
 
     const visibleCampaigns = data.campaigns.filter((c) => channels.includes(c.channel));
@@ -313,7 +307,7 @@ export default function Reporting() {
         <div className="report-chart-row">
           <StackedBarChart
             title="Daily spend by type"
-            subtitle={type === 'all' ? 'Stacked: Brand Awareness (violet) vs Leads (green)' : undefined}
+            subtitle="Stacked: Brand Awareness (violet) vs Leads (green)"
             labels={chartLabels}
             series={spendSeries}
             formatValue={money}
@@ -393,16 +387,6 @@ export default function Reporting() {
         </div>
 
         <div className="card report-controls">
-          <div className="report-control-row">
-            <span className="report-control-label">Type</span>
-            <div className="range-picker" role="group" aria-label="Campaign type">
-              {TYPES.map((t) => (
-                <button key={t.value} type="button" className={`range-picker-option${type === t.value ? ' selected' : ''}`} aria-pressed={type === t.value} onClick={() => setType(t.value)}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
           <div className="report-control-row">
             <span className="report-control-label">Channel</span>
             <div className="range-picker" role="group" aria-label="Channel">
