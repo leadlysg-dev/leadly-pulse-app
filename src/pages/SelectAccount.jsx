@@ -34,12 +34,9 @@ export default function SelectAccount() {
     setSaving(true);
     try {
       await api.selectAccount(provider, selectedId);
-      // Meta continues to the metric picker (the dashboard would redirect
-      // there anyway via metaNeedsMetrics); Google's picker isn't live yet.
-      window.location.href =
-        provider === 'meta'
-          ? '/select-metrics.html?provider=meta'
-          : '/dashboard.html?connected=' + provider;
+      // Both platforms continue to their own metric picker - each one's
+      // conversion actions are configured separately.
+      window.location.href = `/select-metrics.html?provider=${provider}`;
     } catch (err) {
       setError(err.message);
       setSaving(false);
