@@ -7,6 +7,32 @@ const { getEmailFromRequest, getUser } = require('./_store');
 const { fmt, addDays } = require('./_dates');
 const { metaGet } = require('./_meta');
 const { getSelectedMetrics, canonicalKeyFor, buildCatalogGroups } = require('./_metrics');
+const { listGoogleConversionActions } = require('./_googleAds');
+
+// Google conversion_action.category -> the picker's group headings.
+// Anything unmapped lands in "Other conversion actions".
+const GOOGLE_CATEGORY_GROUPS = {
+  LEAD: 'leads_contacts',
+  SUBMIT_LEAD_FORM: 'leads_contacts',
+  PHONE_CALL_LEAD: 'leads_contacts',
+  IMPORTED_LEAD: 'leads_contacts',
+  QUALIFIED_LEAD: 'leads_contacts',
+  CONVERTED_LEAD: 'leads_contacts',
+  CONTACT: 'leads_contacts',
+  SIGNUP: 'leads_contacts',
+  REQUEST_QUOTE: 'leads_contacts',
+  PURCHASE: 'sales',
+  ADD_TO_CART: 'sales',
+  BEGIN_CHECKOUT: 'sales',
+  SUBSCRIBE_PAID: 'sales',
+  BOOK_APPOINTMENT: 'appointments'
+};
+const GOOGLE_GROUP_LABELS = [
+  { id: 'leads_contacts', label: 'Leads & contacts' },
+  { id: 'sales', label: 'Sales & purchases' },
+  { id: 'appointments', label: 'Appointments & bookings' },
+  { id: 'other', label: 'Other conversion actions' }
+];
 
 const json = (statusCode, body) => ({
   statusCode,
@@ -19,16 +45,53 @@ exports.handler = async (event) => {
   if (!email) return json(401, { error: 'Not logged in.' });
 
   const provider = (event.queryStringParameters || {}).provider;
-  if (provider === 'google') {
-    // Live Google Ads data (including its conversion actions) isn't wired
-    // in yet - the frontend shows a "coming soon" state for this. When it
-    // is wired, Google's conversion_action.category maps onto these same
-    // groups.
-    return json(200, { available: false, provider: 'google', groups: [], selected: [] });
-  }
-  if (provider !== 'meta') return json(400, { error: 'Unknown provider.' });
+  if (!['meta', 'google'].includes(provider)) return json(400, { error: 'Unknown provider.' });
 
   const user = await getUser(email);
+
+  if (provider === 'google') {
+    const google = user.accounts.google;
+    if (!google || !google.selectedAdAccountId) {
+      return json(400, { error: 'Connect a Google Ads account first.' });
+    }
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    try {
+      const selected90 = { since: fmt(addDays(today, -89)), until: fmt(today) };
+      const account = (google.adAccounts || []).find((a) => a.id === google.selectedAdAccountId);
+      const actions = await listGoogleConversionActions(
+        google,
+        google.selectedAdAccountId,
+        selected90.since,
+        selected90.until,
+        { loginCustomerId: account && account.loginCustomerId }
+      );
+
+      const groups = GOOGLE_GROUP_LABELS.map((g) => ({ ...g, options: [] }));
+      const byId = Object.fromEntries(groups.map((g) => [g.id, g]));
+      actions.forEach((a) => {
+        const groupId = GOOGLE_CATEGORY_GROUPS[a.category] || 'other';
+        byId[groupId].options.push({ id: a.id, label: a.name, count90d: a.count90d });
+      });
+      groups.forEach((g) => g.options.sort((a, b) => b.count90d - a.count90d));
+
+      // Google action ids are stable resource names - stored selections
+      // match literally, no alias canonicalization needed.
+      const stored = (google.selectedMetrics || []).map((m) => m.id);
+      const offered = new Set(groups.flatMap((g) => g.options.map((o) => o.id)));
+      return json(200, {
+        available: true,
+        provider: 'google',
+        groups: groups.filter((g) => g.options.length > 0),
+        selected: stored.filter((id) => offered.has(id)),
+        hasSavedSelection: Array.isArray(google.selectedMetrics) && google.selectedMetrics.length > 0
+      });
+    } catch (err) {
+      console.error(`[list-metrics] Google conversion actions failed: ${err.message}`);
+      return json(502, { error: 'Could not fetch conversion actions from Google Ads. ' + err.message });
+    }
+  }
+
   const meta = user.accounts.meta;
   if (!meta || !meta.selectedAdAccountId) {
     return json(400, { error: 'Connect a Meta ad account first.' });

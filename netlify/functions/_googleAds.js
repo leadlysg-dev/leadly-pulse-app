@@ -149,11 +149,76 @@ async function fetchGoogleCampaignDaily(google, customerId, since, until, { logi
   };
 }
 
+// The account's ENABLED conversion actions plus how often each fired in the
+// window - the raw material for Google's metric picker. Conversion counts
+// use all_conversions segmented by action; ids are the action resource
+// names, which are stable and what selected_metrics stores for Google.
+async function listGoogleConversionActions(google, customerId, since, until, { loginCustomerId } = {}) {
+  const [catalog, counts] = await Promise.all([
+    gadsSearch(
+      google,
+      customerId,
+      'SELECT conversion_action.resource_name, conversion_action.name, conversion_action.category ' +
+        "FROM conversion_action WHERE conversion_action.status = 'ENABLED'",
+      { loginCustomerId }
+    ),
+    gadsSearch(
+      google,
+      customerId,
+      'SELECT segments.conversion_action, metrics.all_conversions FROM customer ' +
+        `WHERE segments.date BETWEEN '${since}' AND '${until}'`,
+      { loginCustomerId }
+    )
+  ]);
+  const countByAction = {};
+  counts.results.forEach((row) => {
+    const action = row.segments && row.segments.conversionAction;
+    if (action) countByAction[action] = (countByAction[action] || 0) + Number((row.metrics || {}).allConversions || 0);
+  });
+  return catalog.results.map((row) => {
+    const c = row.conversionAction || {};
+    return {
+      id: c.resourceName,
+      name: c.name || 'Conversion action',
+      category: c.category || 'DEFAULT',
+      count90d: Math.round(countByAction[c.resourceName] || 0)
+    };
+  });
+}
+
+// Per-day, per-campaign counts for each selected conversion action. One
+// query covers the daily series (summed over campaigns), the period totals,
+// and the per-campaign numbers the best-campaign highlight needs.
+async function fetchGoogleConversionsDaily(google, customerId, since, until, actionIds, { loginCustomerId } = {}) {
+  if (!actionIds.length) return { rows: [], tokenRefreshed: false };
+  const { results, tokenRefreshed } = await gadsSearch(
+    google,
+    customerId,
+    'SELECT campaign.name, segments.date, segments.conversion_action, metrics.all_conversions FROM campaign ' +
+      `WHERE segments.date BETWEEN '${since}' AND '${until}'`,
+    { loginCustomerId }
+  );
+  const wanted = new Set(actionIds);
+  return {
+    rows: results
+      .filter((row) => wanted.has(row.segments && row.segments.conversionAction))
+      .map((row) => ({
+        campaign: (row.campaign && row.campaign.name) || '(unnamed)',
+        date: row.segments.date,
+        action: row.segments.conversionAction,
+        conversions: Number((row.metrics || {}).allConversions || 0)
+      })),
+    tokenRefreshed
+  };
+}
+
 module.exports = {
   GOOGLE_ADS_API,
   gadsSearch,
   listAccessibleCustomers,
   listClientAccounts,
   fetchGoogleDaily,
-  fetchGoogleCampaignDaily
+  fetchGoogleCampaignDaily,
+  listGoogleConversionActions,
+  fetchGoogleConversionsDaily
 };

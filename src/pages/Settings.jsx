@@ -322,13 +322,31 @@ export default function Settings() {
                   <div className="settings-divider" role="separator" />
                   <div className="settings-row">
                     <div className="settings-row-copy">
-                      <span className="settings-row-label">Tracked metrics</span>
-                      <span className="settings-hint">The conversions shown across Reporting and Pulse.</span>
+                      <span className="settings-row-label">Meta tracked metrics</span>
+                      <span className="settings-hint">The Meta conversions shown across Reporting and Pulse.</span>
                     </div>
                     <Link className="btn btn-secondary" to="/select-metrics.html?provider=meta">
                       Edit
                     </Link>
                   </div>
+                  {status.googleConnected && (
+                    <>
+                      <div className="settings-divider" role="separator" />
+                      <div className="settings-row">
+                        <div className="settings-row-copy">
+                          <span className="settings-row-label">Google tracked metrics</span>
+                          <span className="settings-hint">
+                            {status.googleNeedsMetrics
+                              ? 'Not chosen yet — pick which Google conversion actions to track.'
+                              : 'The Google conversion actions shown on Reporting.'}
+                          </span>
+                        </div>
+                        <Link className="btn btn-secondary" to="/select-metrics.html?provider=google">
+                          {status.googleNeedsMetrics ? 'Choose' : 'Edit'}
+                        </Link>
+                      </div>
+                    </>
+                  )}
                 </div>
               </section>
             )}

@@ -30,6 +30,11 @@ exports.handler = async (event) => {
         !!meta && !!meta.selectedAdAccountId && !(meta.selectedMetrics && meta.selectedMetrics.length),
       googleConnected: !!google,
       googleNeedsPick: !!google && google.adAccounts.length > 1 && !google.selectedAdAccountId,
+      // Google has an account but no conversion actions picked yet - used
+      // for the Settings hint and the Reporting tab's in-place nudge (never
+      // a forced redirect, so pre-feature connections aren't interrupted).
+      googleNeedsMetrics:
+        !!google && !!google.selectedAdAccountId && !(google.selectedMetrics && google.selectedMetrics.length),
       scSiteUrl: (google && google.selectedScSiteUrl) || null,
       // For the Settings page: "Change password" vs "Set password", and the
       // saved AI preferences (null until first saved).

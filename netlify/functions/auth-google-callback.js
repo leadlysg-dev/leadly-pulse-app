@@ -106,10 +106,14 @@ exports.handler = async (event) => {
     };
   }
 
-  const needsPicker = adAccounts.length > 1;
-  return {
-    statusCode: 302,
-    headers: { Location: needsPicker ? '/select-account.html?provider=google' : '/dashboard.html?connected=google' },
-    body: ''
-  };
+  // More than one account: pick one first. Exactly one (auto-selected) and
+  // no conversion metrics chosen yet: straight to Google's metric picker.
+  const g = user.accounts.google;
+  const next =
+    adAccounts.length > 1
+      ? '/select-account.html?provider=google'
+      : g.selectedAdAccountId && !(g.selectedMetrics && g.selectedMetrics.length)
+        ? '/select-metrics.html?provider=google'
+        : '/dashboard.html?connected=google';
+  return { statusCode: 302, headers: { Location: next }, body: '' };
 };
