@@ -54,6 +54,7 @@ function assembleProvider(row) {
     selectedAdAccountId: row.selected_ad_account_id,
     connectedAt: row.connected_at
   };
+  if (row.can_manage !== null && row.can_manage !== undefined) provider.canManage = row.can_manage;
   const scProps = (row.sc_properties || [])
     .sort(byPosition)
     .map((p) => ({ siteUrl: p.site_url, permission: p.permission }));
@@ -83,9 +84,9 @@ async function getUser(email) {
   const { data: accounts, error: accError } = await db()
     .from('connected_accounts')
     .select(
-      'id, provider, access_token, refresh_token, selected_ad_account_id, selected_sc_site_url, connected_at, ' +
-        // ad_accounts selects * so a not-yet-migrated login_customer_id
-        // column can't break every getUser call app-wide.
+      // Base columns select * so not-yet-migrated columns (login_customer_id,
+      // can_manage, ...) can't break every getUser call app-wide.
+      '*, ' +
         'ad_accounts ( * ), ' +
         'sc_properties ( site_url, permission, position ), ' +
         'selected_metrics ( metric_id, label, position, target_cost_per )'
@@ -199,6 +200,48 @@ async function saveAiInsightCache(email, range, entry) {
   if (error) fail(error, 'saving insight cache');
 }
 
+// --- Ad-management audit log ---
+
+async function createChangeLog(email, entry) {
+  const userId = await userIdFor(email);
+  const { error } = await db().from('ad_change_log').insert({
+    user_id: userId,
+    channel: entry.channel,
+    account_id: entry.accountId,
+    entity_type: entry.entityType,
+    entity_id: entry.entityId,
+    entity_name: entry.entityName || null,
+    action: entry.action,
+    old_value: entry.oldValue != null ? String(entry.oldValue) : null,
+    new_value: entry.newValue != null ? String(entry.newValue) : null,
+    api_result: entry.apiResult ? String(entry.apiResult).slice(0, 2000) : null
+  });
+  if (error) fail(error, 'writing the change log');
+}
+
+async function listChangeLog(email, limit = 100) {
+  const userId = await userIdFor(email);
+  const { data, error } = await db()
+    .from('ad_change_log')
+    .select('channel, account_id, entity_type, entity_id, entity_name, action, old_value, new_value, api_result, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) fail(error, 'loading the change log');
+  return (data || []).map((r) => ({
+    channel: r.channel,
+    accountId: r.account_id,
+    entityType: r.entity_type,
+    entityId: r.entity_id,
+    entityName: r.entity_name,
+    action: r.action,
+    oldValue: r.old_value,
+    newValue: r.new_value,
+    apiResult: r.api_result,
+    createdAt: r.created_at
+  }));
+}
+
 // --- Alert rules (created by the AI assistant) ---
 
 async function userIdFor(email) {
@@ -306,22 +349,31 @@ async function saveUser(user) {
       continue;
     }
 
-    const { data: row, error: upsertError } = await db()
+    const connectionRow = {
+      user_id: userId,
+      provider,
+      access_token: acc.accessToken || null,
+      refresh_token: acc.refreshToken || null,
+      selected_ad_account_id: acc.selectedAdAccountId || null,
+      selected_sc_site_url: acc.selectedScSiteUrl || null,
+      connected_at: acc.connectedAt || null,
+      can_manage: acc.canManage === undefined ? null : acc.canManage
+    };
+    let { data: row, error: upsertError } = await db()
       .from('connected_accounts')
-      .upsert(
-        {
-          user_id: userId,
-          provider,
-          access_token: acc.accessToken || null,
-          refresh_token: acc.refreshToken || null,
-          selected_ad_account_id: acc.selectedAdAccountId || null,
-          selected_sc_site_url: acc.selectedScSiteUrl || null,
-          connected_at: acc.connectedAt || null
-        },
-        { onConflict: 'user_id,provider' }
-      )
+      .upsert(connectionRow, { onConflict: 'user_id,provider' })
       .select('id')
       .single();
+    // Migration 009 adds can_manage; until it's run, retry without it.
+    if (upsertError && /can_manage/.test(upsertError.message || '')) {
+      console.error(`[store] connected_accounts.can_manage missing - run migration 009: ${upsertError.message}`);
+      delete connectionRow.can_manage;
+      ({ data: row, error: upsertError } = await db()
+        .from('connected_accounts')
+        .upsert(connectionRow, { onConflict: 'user_id,provider' })
+        .select('id')
+        .single());
+    }
     if (upsertError) fail(upsertError, `saving ${provider} connection`);
 
     const { error: delAdsError } = await db()
@@ -404,6 +456,8 @@ module.exports = {
   getAiInsightCache,
   saveAiInsightCache,
   clearAiInsightCache,
+  createChangeLog,
+  listChangeLog,
   listAlertRules,
   createAlertRule,
   updateAlertRule,

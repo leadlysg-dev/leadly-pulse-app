@@ -61,6 +61,17 @@ export const api = {
 
   getAds: (view) => request(`/.netlify/functions/get-ads?${viewQuery(view)}`),
 
+  getManageTree: (view, channel) =>
+    request(`/.netlify/functions/get-manage-tree?${viewQuery(view)}&channel=${encodeURIComponent(channel)}`),
+
+  manageEntity: (payload) =>
+    request('/.netlify/functions/manage-entity', { method: 'POST', body: JSON.stringify(payload) }),
+
+  manageBulk: (payload) =>
+    request('/.netlify/functions/manage-bulk', { method: 'POST', body: JSON.stringify(payload) }),
+
+  getAuditLog: () => request('/.netlify/functions/get-audit-log'),
+
   listAccounts: () => request('/.netlify/functions/list-accounts'),
 
   selectAccount: (provider, accountId) =>

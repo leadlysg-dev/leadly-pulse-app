@@ -212,8 +212,35 @@ async function fetchGoogleConversionsDaily(google, customerId, since, until, act
   };
 }
 
+// One mutate against a customer's resource collection (campaigns, adGroups,
+// adGroupAds, campaignBudgets). Throws with Google's own message so callers
+// can log and surface it - a PERMISSION_DENIED here means the Google user
+// lacks a manager/standard role on the account.
+async function gadsMutate(google, customerId, collection, operations, { loginCustomerId } = {}) {
+  const { googleApi } = require('./_google');
+  const { status, json, tokenRefreshed } = await googleApi(google, {
+    url: `${GOOGLE_ADS_API}/customers/${customerId}/${collection}:mutate`,
+    method: 'POST',
+    body: { operations },
+    headers: {
+      'developer-token': process.env.GOOGLE_ADS_DEVELOPER_TOKEN || '',
+      ...(loginCustomerId ? { 'login-customer-id': loginCustomerId } : {})
+    }
+  });
+  if (status !== 200) {
+    const detail =
+      (json.error && (json.error.message || (json.error.details || [])[0]?.errors?.[0]?.message)) ||
+      `Google Ads API returned ${status}`;
+    const err = new Error(detail);
+    err.status = status;
+    throw err;
+  }
+  return { results: json.results || [], tokenRefreshed };
+}
+
 module.exports = {
   GOOGLE_ADS_API,
+  gadsMutate,
   gadsSearch,
   listAccessibleCustomers,
   listClientAccounts,

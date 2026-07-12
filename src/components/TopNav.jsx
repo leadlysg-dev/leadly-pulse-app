@@ -5,6 +5,7 @@ import './TopNav.css';
 const TABS = [
   { to: '/pulse.html', label: 'PulseAI' },
   { to: '/reporting.html', label: 'Reporting' },
+  { to: '/manage.html', label: 'Manage' },
   { to: '/creative.html', label: 'Creative' },
   { to: '/seo.html', label: 'Local SEO' },
   { to: '/settings.html', label: 'Settings' }

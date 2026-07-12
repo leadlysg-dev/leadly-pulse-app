@@ -54,6 +54,8 @@ module.exports = {
   getAiInsightCache: backend.getAiInsightCache,
   saveAiInsightCache: backend.saveAiInsightCache,
   clearAiInsightCache: backend.clearAiInsightCache,
+  createChangeLog: backend.createChangeLog,
+  listChangeLog: backend.listChangeLog,
   listAlertRules: backend.listAlertRules,
   createAlertRule: backend.createAlertRule,
   updateAlertRule: backend.updateAlertRule,

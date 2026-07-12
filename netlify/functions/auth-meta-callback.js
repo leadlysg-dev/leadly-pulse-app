@@ -35,11 +35,26 @@ exports.handler = async (event) => {
   const acctData = await acctRes.json();
   const adAccounts = (acctData.data || []).map((a) => ({ id: a.id, name: a.name }));
 
+  // Write capability: the Manage tab needs the ads_management permission.
+  // Users who decline it (or connected before it was requested) stay
+  // read-only - detected here and stored, so the UI can disable controls
+  // instead of failing on the first write.
+  let canManage = false;
+  try {
+    const permRes = await fetch(`https://graph.facebook.com/v19.0/me/permissions?access_token=${accessToken}`);
+    const permData = await permRes.json();
+    canManage = (permData.data || []).some((p) => p.permission === 'ads_management' && p.status === 'granted');
+    console.log(`[auth-meta-callback] ads_management granted: ${canManage}`);
+  } catch (err) {
+    console.error(`[auth-meta-callback] permission check failed: ${err.message}`);
+  }
+
   const user = await getUser(email);
   if (!user) return { statusCode: 401, body: 'Session expired. Please log in again.' };
 
   user.accounts.meta = {
     accessToken,
+    canManage,
     adAccounts,
     selectedAdAccountId: adAccounts.length === 1 ? adAccounts[0].id : null,
     connectedAt: new Date().toISOString()

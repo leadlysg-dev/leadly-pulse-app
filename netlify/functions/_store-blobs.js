@@ -76,6 +76,17 @@ async function saveAiInsightCache(email, range, entry) {
   });
 }
 
+async function createChangeLog(email, entry) {
+  await withUser(email, (user) => {
+    user.changeLog = [{ ...entry, createdAt: new Date().toISOString() }, ...(user.changeLog || [])].slice(0, 200);
+  });
+}
+
+async function listChangeLog(email, limit = 100) {
+  const user = await getUser(email);
+  return ((user && user.changeLog) || []).slice(0, limit);
+}
+
 async function clearAiInsightCache(email) {
   await withUser(email, (user) => {
     delete user.aiInsightCache;
@@ -136,6 +147,8 @@ module.exports = {
   getAiInsightCache,
   saveAiInsightCache,
   clearAiInsightCache,
+  createChangeLog,
+  listChangeLog,
   listAlertRules,
   createAlertRule,
   updateAlertRule,

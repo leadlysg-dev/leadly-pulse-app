@@ -12,6 +12,7 @@ import Seo from './pages/Seo';
 import SelectAccount from './pages/SelectAccount';
 import SelectMetrics from './pages/SelectMetrics';
 import Upgrade from './pages/Upgrade';
+import Manage from './pages/Manage';
 
 // The marketing site is now the public front door, so "/" just routes into
 // the app: logged-in visitors go to Pulse, everyone else to login.
@@ -53,6 +54,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/login.html" element={<Login />} />
         <Route path="/pulse.html" element={<Pulse />} />
         <Route path="/reporting.html" element={<Reporting />} />
+        <Route path="/manage.html" element={<Manage />} />
         <Route path="/creative.html" element={<Creative />} />
         <Route path="/seo.html" element={<Seo />} />
         <Route path="/settings.html" element={<Settings />} />
