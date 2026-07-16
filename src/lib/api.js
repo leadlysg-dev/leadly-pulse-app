@@ -164,6 +164,19 @@ export const api = {
       body: JSON.stringify({ messages })
     }),
 
+  pulseChat: (payload) =>
+    request('/.netlify/functions/pulse-chat', { method: 'POST', body: JSON.stringify(payload) }),
+
+  pulseChips: () => request('/.netlify/functions/pulse-chips'),
+
+  automationSettings: () => request('/.netlify/functions/automation-settings'),
+
+  automationSettingsSave: (module, enabled) =>
+    request('/.netlify/functions/automation-settings', {
+      method: 'POST',
+      body: JSON.stringify({ module, enabled })
+    }),
+
   workspacesList: () => request('/.netlify/functions/workspaces-list'),
 
   workspaceSelect: (workspaceId) =>

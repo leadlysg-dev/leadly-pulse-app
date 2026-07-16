@@ -3,6 +3,7 @@
    font, radius, spacing and shadow value - nothing below states a raw
    value, only var(--token)s from it. */
 @import '../../brand.css';
+@import './spec.css';
 
 #root {
   min-height: 100vh;
