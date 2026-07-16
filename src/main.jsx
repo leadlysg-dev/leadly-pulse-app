@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import './styles/global.css';
@@ -17,24 +17,27 @@ import SelectAccount from './pages/SelectAccount';
 import SelectMetrics from './pages/SelectMetrics';
 import Upgrade from './pages/Upgrade';
 
-// "/" routes into the app: logged-in visitors go to Pulse, everyone else to
-// login (the marketing site is the public front door).
+// "/" (and any unknown path) routes into the app: logged-in visitors go to
+// Pulse, everyone else to login. Client-side Navigate, not a full page
+// reload - a location.replace() fired mid-load can leave the next document
+// blank in some browsers.
 function RootRedirect() {
+  const [to, setTo] = useState(null);
   useEffect(() => {
     let cancelled = false;
     api
       .getStatus()
       .then((s) => {
-        if (!cancelled) window.location.replace(s.loggedIn ? '/pulse.html' : '/login.html');
+        if (!cancelled) setTo(s.loggedIn ? '/pulse.html' : '/login.html');
       })
       .catch(() => {
-        if (!cancelled) window.location.replace('/login.html');
+        if (!cancelled) setTo('/login.html');
       });
     return () => {
       cancelled = true;
     };
   }, []);
-  return null;
+  return to ? <Navigate to={to} replace /> : null;
 }
 
 // Old tab URLs forward to their homes in the five-tab dashboard, keeping the
@@ -47,37 +50,48 @@ function LegacyRedirect({ to }) {
 
 const tab = (title, node) => <Shell title={title}>{node}</Shell>;
 
+// Every page answers on both "/x.html" and "/x". The .html forms are what
+// the Netlify Functions backend redirects to (auth callbacks, login) and
+// must never break; the clean forms are what people actually type.
+const PAGES = [
+  ['login', <Login />],
+  ['invite', <Invite />],
+  ['pulse', tab('Pulse', <PulseTab />)],
+  ['admanager', tab('Ad Manager', <AdManagerTab />)],
+  ['studio', tab('Studio', <StudioTab />)],
+  ['crm', tab('CRM', <CrmTab />)],
+  ['automations', tab('Automations', <AutomationsTab />)],
+  ['settings', <Settings />],
+  ['seo', <Seo />],
+  ['select-account', <SelectAccount />],
+  ['select-metrics', <SelectMetrics />],
+  ['upgrade', <Upgrade />]
+];
+
+const LEGACY = [
+  ['dashboard', '/pulse.html'],
+  ['reports', '/pulse.html'],
+  ['reporting', '/pulse.html'],
+  ['assistant', '/pulse.html'],
+  ['manage', '/admanager.html'],
+  ['creative', '/pulse.html']
+];
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<RootRedirect />} />
-        {/* Paths keep the .html suffix because the Netlify Functions backend
-            (auth callbacks, login) redirects to these exact hardcoded paths. */}
-        <Route path="/login.html" element={<Login />} />
-        <Route path="/invite.html" element={<Invite />} />
-
-        {/* The five-tab dashboard (leadly-pulse-ui-spec-v5) */}
-        <Route path="/pulse.html" element={tab('Pulse', <PulseTab />)} />
-        <Route path="/admanager.html" element={tab('Ad Manager', <AdManagerTab />)} />
-        <Route path="/studio.html" element={tab('Studio', <StudioTab />)} />
-        <Route path="/crm.html" element={tab('CRM', <CrmTab />)} />
-        <Route path="/automations.html" element={tab('Automations', <AutomationsTab />)} />
-
-        {/* Account plumbing that predates the five-tab shell */}
-        <Route path="/settings.html" element={<Settings />} />
-        <Route path="/seo.html" element={<Seo />} />
-        <Route path="/select-account.html" element={<SelectAccount />} />
-        <Route path="/select-metrics.html" element={<SelectMetrics />} />
-        <Route path="/upgrade.html" element={<Upgrade />} />
-
-        {/* Legacy routes */}
-        <Route path="/dashboard.html" element={<LegacyRedirect to="/pulse.html" />} />
-        <Route path="/reports.html" element={<LegacyRedirect to="/pulse.html" />} />
-        <Route path="/reporting.html" element={<LegacyRedirect to="/pulse.html" />} />
-        <Route path="/assistant.html" element={<LegacyRedirect to="/pulse.html" />} />
-        <Route path="/manage.html" element={<LegacyRedirect to="/admanager.html" />} />
-        <Route path="/creative.html" element={<LegacyRedirect to="/pulse.html" />} />
+        {PAGES.flatMap(([name, element]) => [
+          <Route key={`${name}.html`} path={`/${name}.html`} element={element} />,
+          <Route key={name} path={`/${name}`} element={element} />
+        ])}
+        {LEGACY.flatMap(([name, to]) => [
+          <Route key={`${name}.html`} path={`/${name}.html`} element={<LegacyRedirect to={to} />} />,
+          <Route key={name} path={`/${name}`} element={<LegacyRedirect to={to} />} />
+        ])}
+        {/* Anything unknown lands where "/" does - never a blank page. */}
+        <Route path="*" element={<RootRedirect />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
