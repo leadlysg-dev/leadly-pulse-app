@@ -1,12 +1,20 @@
+/* The app nav: white, minimal, hairline under it - the brand .nav treatment
+   at product density. Blue is spent on exactly one thing here: the active
+   tab. */
 .top-nav {
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-1);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--canvas) 88%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 .top-nav-inner {
-  max-width: 960px;
+  max-width: var(--container);
   margin: 0 auto;
-  padding: 12px 24px;
+  padding: var(--space-3) var(--gutter);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -15,7 +23,20 @@
 .top-nav-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
+}
+
+/* The drawn mark: a small stage - dark square, the pulse line on it. */
+.top-nav-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  background: var(--panel);
+  color: var(--on-panel);
+  display: grid;
+  place-items: center;
+  flex: none;
+  margin-right: var(--space-1);
 }
 
 /* The Leadly logo anchors the lockup at a fixed height. */
@@ -28,27 +49,26 @@
 
 /* Text fallback until the logo file exists. */
 .top-nav-leadly {
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: -0.01em;
+  font-weight: var(--weight-semibold);
+  font-size: var(--fs-h3);
+  letter-spacing: var(--tracking-h);
   line-height: 1;
 }
 
-/* Product wordmark: brand color, lighter weight than a logo - reads as
-   "Workspace" next to the Google mark, not as a tagline. */
+/* Product wordmark: quiet next to the company mark. */
 .top-nav-product {
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  color: var(--series-1);
+  font-size: var(--fs-h3);
+  font-weight: var(--weight-body);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-3-aa);
   line-height: 1;
 }
 
 .top-nav-tabs {
   display: flex;
   align-items: center;
-  gap: 4px;
-  /* Four tabs don't fit a phone row - let the strip scroll sideways
+  gap: var(--space-1);
+  /* Seven tabs don't fit a phone row - let the strip scroll sideways
      instead of pushing "Log out" off the edge. */
   overflow-x: auto;
   scrollbar-width: none;
@@ -60,41 +80,43 @@
 }
 
 .top-nav-tab {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-2);
   text-decoration: none;
-  padding: 6px 12px;
-  border-radius: 999px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--r-sm);
   white-space: nowrap;
-  transition: color var(--motion-fast), background-color var(--motion-fast);
+  transition: color var(--dur-2) var(--ease), background-color var(--dur-2) var(--ease);
 }
 
 .top-nav-tab:hover {
-  color: var(--text-primary);
-  background: var(--gridline);
+  color: var(--text-1);
+  background: var(--surface-2);
+  text-decoration: none;
 }
 
 .top-nav-tab.active {
-  color: var(--text-primary);
-  background: var(--gridline);
-  font-weight: 500;
+  color: var(--accent-strong);
+  background: var(--tint);
+  font-weight: var(--weight-semibold);
 }
 
 .top-nav-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .top-nav-email {
-  font-size: 13px;
-  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
 }
 
 .top-nav-email-skeleton {
   width: 140px;
   height: 14px;
-  border-radius: 4px;
+  border-radius: var(--r-xs);
 }
 
 /* On wide screens the brand and actions flex equally, so the tab strip sits
@@ -118,23 +140,23 @@
 }
 
 .top-nav-logout {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
   text-decoration: none;
-  transition: color var(--motion-fast);
+  transition: color var(--dur-2) var(--ease);
 }
 
 .top-nav-logout:hover {
-  color: var(--text-primary);
+  color: var(--text-1);
   text-decoration: underline;
 }
 
 /* Phones: the email is the least important thing in the bar - drop it, and
-   tighten the three tabs so they and "Log out" fit a 360px row. */
+   tighten the tabs so they and "Log out" fit a 360px row. */
 @media (max-width: 560px) {
   .top-nav-inner {
-    padding: 12px 14px;
-    gap: 8px;
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-2);
   }
 
   .top-nav-email,
@@ -147,11 +169,11 @@
   }
 
   .top-nav-tabs {
-    gap: 2px;
+    gap: var(--space-1);
   }
 
   .top-nav-tab {
-    font-size: 12px;
-    padding: 6px 8px;
+    font-size: var(--fs-eyebrow);
+    padding: var(--space-1) var(--space-2);
   }
 }

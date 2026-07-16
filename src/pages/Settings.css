@@ -2,51 +2,51 @@
    major blocks, 20 card insets, 12/8/4 inside groups. */
 .settings-page {
   min-height: 100vh;
-  background: var(--page-plane);
+  background: var(--canvas);
 }
 
 .settings-main {
-  max-width: 960px;
+  max-width: var(--container);
   margin: 0 auto;
-  padding: 24px 24px 64px;
+  padding: var(--space-5) var(--space-5) var(--space-8);
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-5);
 }
 
 .settings-head h1 {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: var(--fs-h2);
+  font-weight: var(--weight-semibold);
   line-height: 1.2;
 }
 
 .settings-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .settings-section h2 {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-semibold);
   line-height: 1.2;
 }
 
 .settings-section-sub {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: -8px; /* 4px below the heading it captions */
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
+  margin-top: -8px; /* var(--space-1) below the heading it captions */
 }
 
 .settings-card {
-  padding: 20px;
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .settings-divider {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line);
 }
 
 /* Label/value rows with an action or toggle on the right */
@@ -54,30 +54,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .settings-row-copy {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   min-width: 0;
 }
 
 .settings-row-label {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-medium);
 }
 
 .settings-row-value {
-  font-size: 13px;
-  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
   overflow-wrap: anywhere;
 }
 
 .settings-hint {
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
 }
 
 /* Password form */
@@ -88,119 +88,119 @@
 }
 
 .password-form h3 {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-semibold);
 }
 
 .password-form .settings-hint {
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 .password-form label {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  margin: 16px 0 8px;
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  margin: var(--space-4) 0 var(--space-2);
 }
 
 .password-form input {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-1);
-  color: var(--text-primary);
-  font-size: 14px;
-  transition: border-color var(--motion-fast);
+  padding: var(--space-3) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text-1);
+  font-size: var(--fs-sm);
+  transition: border-color var(--dur-2) var(--ease);
 }
 
 .password-form input:focus {
-  outline: 2px solid var(--series-1);
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
 .settings-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 16px;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
 }
 
 .settings-saved {
-  font-size: 13px;
-  color: var(--good-text);
+  font-size: var(--fs-sm);
+  color: var(--success);
 }
 
 .settings-error {
-  color: var(--status-critical);
-  font-size: 13px;
-  margin-top: 8px;
+  color: var(--danger);
+  font-size: var(--fs-sm);
+  margin-top: var(--space-2);
 }
 
 /* Connections */
 .connection-row {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .connection-main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .connection-copy {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .connection-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-medium);
 }
 
 .connection-status {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--text-muted);
+  gap: var(--space-2);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
 }
 
 .connection-dot {
   width: 8px;
   height: 8px;
-  border-radius: 999px;
-  background: var(--baseline);
+  border-radius: var(--r-pill);
+  background: var(--line-strong);
 }
 
 .connection-status.is-connected {
-  color: var(--good-text);
+  color: var(--success);
 }
 
 .connection-status.is-connected .connection-dot {
-  background: var(--status-good);
+  background: var(--success);
 }
 
 .connection-confirm {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .connection-confirm p {
-  font-size: 13px;
-  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
 }
 
 .connection-confirm-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
@@ -208,8 +208,8 @@
 .ai-group {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  transition: opacity var(--motion-fast);
+  gap: var(--space-4);
+  transition: opacity var(--dur-2) var(--ease);
 }
 
 .ai-group.is-disabled {
@@ -220,7 +220,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .ai-field textarea {
@@ -228,25 +228,25 @@
 }
 
 .ai-field label {
-  font-size: 13px;
-  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
 }
 
 .ai-field textarea {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-1);
-  color: var(--text-primary);
-  font-size: 14px;
-  font-family: var(--font-sans);
+  padding: var(--space-3) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text-1);
+  font-size: var(--fs-sm);
+  font-family: var(--font);
   resize: vertical;
-  transition: border-color var(--motion-fast);
+  transition: border-color var(--dur-2) var(--ease);
 }
 
 .ai-field textarea:focus {
-  outline: 2px solid var(--series-1);
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
@@ -261,11 +261,11 @@
   width: 40px;
   height: 24px;
   padding: 3px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--gridline);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--line);
   cursor: pointer;
-  transition: background-color var(--motion-fast), border-color var(--motion-fast);
+  transition: background-color var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
 }
 
 .toggle:disabled {
@@ -274,7 +274,7 @@
 }
 
 .toggle:focus-visible {
-  outline: 2px solid var(--series-1);
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
@@ -282,25 +282,25 @@
   display: block;
   width: 16px;
   height: 16px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--surface-2);
-  box-shadow: var(--shadow-card);
-  transition: transform var(--motion-fast);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--dur-2) var(--ease);
 }
 
 .toggle-on {
-  background: var(--series-1);
-  border-color: var(--series-1);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .toggle-on .toggle-knob {
   transform: translateX(16px);
-  background: #fff;
+  background: var(--surface);
 }
 
 @media (max-width: 480px) {
   .settings-main {
-    padding: 16px 16px 48px;
+    padding: var(--space-4) var(--space-4) var(--space-7);
   }
 
   .settings-row,

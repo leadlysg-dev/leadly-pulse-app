@@ -22,6 +22,18 @@ export default function TopNav({ email }) {
     <header className="top-nav">
       <div className="top-nav-inner">
         <div className="top-nav-brand">
+          <span className="top-nav-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="15" height="15">
+              <path
+                d="M7 21 L13 13 L18 18 L25 8"
+                stroke="currentColor"
+                strokeWidth="3"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
           {logoMissing ? (
             <span className="top-nav-leadly">Leadly</span>
           ) : (

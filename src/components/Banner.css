@@ -1,24 +1,24 @@
 .banner {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  border: 1px solid var(--border);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  border: 1px solid var(--line);
 }
 
 .banner-warning {
-  background: color-mix(in srgb, var(--status-warning) 12%, var(--surface-1));
-  color: var(--text-primary);
+  background: color-mix(in srgb, var(--chart-4) 12%, var(--surface));
+  color: var(--text-1);
 }
 
 .banner-info {
-  background: color-mix(in srgb, var(--series-1) 10%, var(--surface-1));
-  color: var(--text-primary);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  color: var(--text-1);
 }
 
 .banner-success {
-  background: color-mix(in srgb, var(--status-good) 10%, var(--surface-1));
-  color: var(--text-primary);
+  background: color-mix(in srgb, var(--success) 10%, var(--surface));
+  color: var(--text-1);
 }

@@ -185,7 +185,7 @@ export function DonutChart({ title, subtitle, segments, formatValue }) {
     <ChartShell title={title} subtitle={subtitle} table={table}>
       <div className="report-donut-wrap">
         <svg viewBox="0 0 200 200" role="img" aria-label={title}>
-          <circle cx="100" cy="100" r={R} fill="none" stroke="var(--gridline)" strokeWidth={STROKE} opacity="0.4" />
+          <circle cx="100" cy="100" r={R} fill="none" stroke="var(--line)" strokeWidth={STROKE} opacity="0.4" />
           {total > 0 &&
             segments.map((s) => {
               const frac = s.value / total;
@@ -263,7 +263,7 @@ export function PairedTrendChart({ title, subtitle, labels, bars, line, target, 
   const legend = [
     { label: bars.label, color: bars.color },
     { label: line.label, color: line.color },
-    ...(target ? [{ label: `Target ${formatLine(target)}`, color: 'var(--text-muted)', dashed: true }] : [])
+    ...(target ? [{ label: `Target ${formatLine(target)}`, color: 'var(--text-3-aa)', dashed: true }] : [])
   ];
 
   return (

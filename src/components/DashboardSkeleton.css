@@ -1,13 +1,13 @@
 .dash-skeleton {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .skeleton-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px; /* matches the KPI band, so content doesn't shift on load */
+  gap: var(--space-3); /* matches the KPI band, so content doesn't shift on load */
 }
 
 .skeleton-tile {
@@ -17,7 +17,7 @@
 .skeleton-charts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .skeleton-chart {

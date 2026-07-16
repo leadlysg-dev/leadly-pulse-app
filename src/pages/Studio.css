@@ -2,13 +2,13 @@
    two-column workspace: the brief on the left, the board on the right. */
 .studio-page {
   min-height: 100vh;
-  background: var(--page-plane);
+  background: var(--canvas);
 }
 
 .studio-main {
-  max-width: 1400px;
+  max-width: var(--container);
   margin: 0 auto;
-  padding: 24px 24px 64px;
+  padding: var(--space-5) var(--space-5) var(--space-8);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -22,8 +22,8 @@
 }
 
 .studio-head h1 {
-  font-size: var(--text-page-title);
-  font-weight: 600;
+  font-size: var(--fs-h2);
+  font-weight: var(--weight-semibold);
   line-height: 1.2;
 }
 
@@ -31,31 +31,31 @@
 .studio-view-tabs {
   display: flex;
   gap: 2px;
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
   padding: 3px;
 }
 
 .studio-view-tabs button {
   border: 0;
   background: none;
-  color: var(--text-muted);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  padding: 6px 16px;
-  border-radius: 6px;
+  color: var(--text-3-aa);
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-semibold);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--r-sm);
   cursor: pointer;
-  transition: background-color var(--motion-fast), color var(--motion-fast);
+  transition: background-color var(--dur-2) var(--ease), color var(--dur-2) var(--ease);
 }
 
 .studio-view-tabs button:hover {
-  color: var(--text-primary);
+  color: var(--text-1);
 }
 
 .studio-view-tabs button.on {
-  background: var(--series-1);
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 /* credits strip */
@@ -63,14 +63,14 @@
   margin-left: auto;
   display: flex;
   align-items: stretch;
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
   overflow: hidden;
 }
 
 .studio-bal > div {
-  padding: 6px 14px;
+  padding: var(--space-2) var(--space-4);
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -78,54 +78,54 @@
 }
 
 .studio-bal > div + div {
-  border-left: 1px solid var(--border);
+  border-left: 1px solid var(--line);
 }
 
 .studio-bal-label {
-  font-size: var(--text-micro);
-  color: var(--text-muted);
-  font-weight: 600;
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
+  font-weight: var(--weight-semibold);
 }
 
 .studio-bal b {
-  font-size: var(--text-body);
-  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-bold);
   font-variant-numeric: tabular-nums;
-  color: var(--good-text);
+  color: var(--success);
 }
 
 .studio-bal b.low {
-  color: var(--status-warning);
+  color: var(--chart-4);
 }
 
 .studio-bal b.out {
-  color: var(--status-critical);
+  color: var(--danger);
 }
 
 .studio-bal b.na {
-  color: var(--text-muted);
-  font-size: var(--text-caption);
-  font-weight: 600;
+  color: var(--text-3-aa);
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--weight-semibold);
 }
 
 .studio-bal b.spend {
-  color: var(--text-secondary);
+  color: var(--text-2);
 }
 
 .studio-bal button {
   background: none;
   border: 0;
-  border-left: 1px solid var(--border);
-  color: var(--text-muted);
-  font-size: var(--text-body);
-  padding: 0 12px;
+  border-left: 1px solid var(--line);
+  color: var(--text-3-aa);
+  font-size: var(--fs-sm);
+  padding: 0 var(--space-3);
   cursor: pointer;
 }
 
 /* layout */
 .studio-layout {
   display: flex;
-  gap: var(--space-6);
+  gap: var(--space-5);
   align-items: flex-start;
 }
 
@@ -153,10 +153,10 @@
 
 /* steps */
 .studio-step {
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
   padding: var(--space-4);
 }
 
@@ -164,38 +164,38 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--text-caption);
-  font-weight: 600;
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--weight-semibold);
+  color: var(--text-3-aa);
   margin: 0 0 var(--space-2);
 }
 
 .studio-step > h4 i {
   width: 18px;
   height: 18px;
-  border-radius: 5px;
+  border-radius: var(--r-sm);
   background: var(--surface-2);
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   font-style: normal;
-  font-size: 10px;
+  font-size: var(--fs-eyebrow);
   display: grid;
   place-items: center;
-  color: var(--text-secondary);
+  color: var(--text-2);
   flex: none;
 }
 
 .studio-sub {
-  font-size: var(--text-caption);
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
   margin-top: var(--space-2);
   line-height: 1.5;
 }
 
 .studio-label {
   display: block;
-  font-size: var(--text-micro);
-  font-weight: 600;
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--weight-semibold);
+  color: var(--text-3-aa);
   margin: var(--space-3) 0 var(--space-1);
 }
 
@@ -206,17 +206,17 @@
 .studio-input {
   width: 100%;
   background: var(--surface-2);
-  border: 1px solid var(--gridline);
-  color: var(--text-primary);
+  border: 1px solid var(--line);
+  color: var(--text-1);
   font: inherit;
-  font-size: var(--text-body);
-  border-radius: var(--radius-sm);
-  padding: 9px 12px;
+  font-size: var(--fs-sm);
+  border-radius: var(--r-sm);
+  padding: 9px var(--space-3);
   outline: none;
 }
 
 .studio-input:focus {
-  border-color: var(--series-1);
+  border-color: var(--accent);
 }
 
 textarea.studio-input {
@@ -252,30 +252,30 @@ textarea.studio-copy {
 
 .studio-kind {
   background: var(--surface-2);
-  border: 1px solid var(--gridline);
-  border-radius: var(--radius-sm);
-  padding: 10px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: var(--space-3) var(--space-2);
   cursor: pointer;
   text-align: center;
   font: inherit;
   color: inherit;
-  transition: border-color var(--motion-fast), background-color var(--motion-fast);
+  transition: border-color var(--dur-2) var(--ease), background-color var(--dur-2) var(--ease);
 }
 
 .studio-kind.on {
-  border-color: var(--series-1);
-  background: color-mix(in srgb, var(--series-1) 10%, var(--surface-2));
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface-2));
 }
 
 .studio-kind b {
   display: block;
-  font-size: var(--text-sm);
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-semibold);
 }
 
 .studio-kind span {
-  font-size: var(--text-micro);
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
   display: block;
   margin-top: 1px;
 }
@@ -287,33 +287,33 @@ textarea.studio-copy {
   gap: var(--space-3);
   width: 100%;
   background: var(--surface-2);
-  border: 1px solid var(--gridline);
-  border-radius: var(--radius-sm);
-  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: var(--space-3) var(--space-3);
   cursor: pointer;
   margin-top: var(--space-2);
   font: inherit;
   color: inherit;
   text-align: left;
-  transition: border-color var(--motion-fast), background-color var(--motion-fast);
+  transition: border-color var(--dur-2) var(--ease), background-color var(--dur-2) var(--ease);
 }
 
 .studio-toggle.on {
-  border-color: var(--series-1);
-  background: color-mix(in srgb, var(--series-1) 8%, var(--surface-2));
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
 }
 
 .studio-switch {
   width: 34px;
   height: 19px;
-  border-radius: 99px;
-  background: var(--baseline);
+  border-radius: var(--r-pill);
+  background: var(--line-strong);
   position: relative;
   flex: none;
 }
 
 .studio-toggle.on .studio-switch {
-  background: var(--series-1);
+  background: var(--accent);
 }
 
 .studio-switch i {
@@ -323,8 +323,8 @@ textarea.studio-copy {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #fff;
-  transition: left var(--motion-fast);
+  background: var(--on-panel);
+  transition: left var(--dur-2) var(--ease);
 }
 
 .studio-toggle.on .studio-switch i {
@@ -333,13 +333,13 @@ textarea.studio-copy {
 
 .studio-toggle-copy b {
   display: block;
-  font-size: var(--text-sm);
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-semibold);
 }
 
 .studio-toggle-copy span {
-  font-size: var(--text-micro);
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
   display: block;
   margin-top: 1px;
   line-height: 1.35;
@@ -348,36 +348,36 @@ textarea.studio-copy {
 /* dropzones + attachments */
 .studio-drop {
   width: 100%;
-  border: 1.5px dashed var(--baseline);
-  border-radius: var(--radius-sm);
-  padding: 14px 12px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--r-sm);
+  padding: var(--space-4) var(--space-3);
   text-align: center;
   cursor: pointer;
   background: var(--surface-2);
   font: inherit;
   color: inherit;
-  transition: border-color var(--motion-fast), background-color var(--motion-fast);
+  transition: border-color var(--dur-2) var(--ease), background-color var(--dur-2) var(--ease);
 }
 
 .studio-drop.slim {
-  padding: 10px 12px;
+  padding: var(--space-3) var(--space-3);
 }
 
 .studio-drop:hover {
-  border-color: var(--series-1);
-  background: color-mix(in srgb, var(--series-1) 6%, var(--surface-2));
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface-2));
 }
 
 .studio-drop b {
   display: block;
-  font-size: var(--text-sm);
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-semibold);
   margin-bottom: 2px;
 }
 
 .studio-drop span {
-  font-size: var(--text-micro);
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
   line-height: 1.4;
   display: block;
 }
@@ -393,9 +393,9 @@ textarea.studio-copy {
   position: relative;
   width: 56px;
   height: 56px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-sm);
   overflow: hidden;
-  border: 1px solid var(--gridline);
+  border: 1px solid var(--line);
 }
 
 .studio-ref img {
@@ -414,8 +414,8 @@ textarea.studio-copy {
   border-radius: 50%;
   border: 0;
   background: rgba(0, 0, 0, 0.75);
-  color: #fff;
-  font-size: 10px;
+  color: var(--on-accent);
+  font-size: var(--fs-eyebrow);
   line-height: 1;
   cursor: pointer;
   padding: 0;
@@ -432,16 +432,16 @@ textarea.studio-copy {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
+  padding: 7px var(--space-3);
+  border-radius: var(--r-sm);
   background: var(--surface-2);
-  border: 1px solid var(--gridline);
+  border: 1px solid var(--line);
 }
 
 .studio-doc-name {
-  font-size: var(--text-caption);
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--weight-semibold);
+  color: var(--text-2);
   max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -449,44 +449,44 @@ textarea.studio-copy {
 }
 
 .studio-doc-size {
-  font-size: var(--text-micro);
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
 }
 
 .studio-doc button {
   border: 0;
   background: none;
-  color: var(--text-muted);
+  color: var(--text-3-aa);
   cursor: pointer;
-  font-size: 11px;
+  font-size: var(--fs-eyebrow);
   padding: 0;
 }
 
 .studio-note {
   margin-top: var(--space-2);
-  padding: 9px 11px;
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--series-1) 8%, var(--surface-2));
-  border: 1px solid color-mix(in srgb, var(--series-1) 30%, transparent);
-  font-size: var(--text-caption);
-  color: var(--text-secondary);
+  padding: 9px var(--space-3);
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-2);
   line-height: 1.45;
 }
 
 .studio-note.warn {
-  background: color-mix(in srgb, var(--status-warning) 10%, var(--surface-2));
-  border-color: color-mix(in srgb, var(--status-warning) 35%, transparent);
+  background: color-mix(in srgb, var(--chart-4) 10%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--chart-4) 35%, transparent);
 }
 
 .studio-note code {
-  font-size: var(--text-micro);
+  font-size: var(--fs-eyebrow);
 }
 
 /* placements */
 .studio-plc {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-1);
 }
 
 .studio-p {
@@ -494,30 +494,30 @@ textarea.studio-copy {
   align-items: center;
   gap: var(--space-3);
   background: var(--surface-2);
-  border: 1px solid var(--gridline);
-  border-radius: var(--radius-sm);
-  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: var(--space-2) var(--space-3);
   cursor: pointer;
   font: inherit;
   color: inherit;
   text-align: left;
-  transition: border-color var(--motion-fast), background-color var(--motion-fast);
+  transition: border-color var(--dur-2) var(--ease), background-color var(--dur-2) var(--ease);
 }
 
 .studio-p.on {
-  border-color: var(--series-1);
-  background: color-mix(in srgb, var(--series-1) 8%, var(--surface-2));
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
 }
 
 .studio-p-shape {
-  border: 1.5px solid var(--text-muted);
-  border-radius: 2px;
+  border: 1.5px solid var(--text-3-aa);
+  border-radius: var(--r-xs);
   flex: none;
 }
 
 .studio-p.on .studio-p-shape {
-  border-color: var(--series-1);
-  background: var(--series-1);
+  border-color: var(--accent);
+  background: var(--accent);
 }
 
 .studio-p-copy {
@@ -527,18 +527,18 @@ textarea.studio-copy {
 
 .studio-p-copy b {
   display: block;
-  font-size: var(--text-caption);
-  font-weight: 600;
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--weight-semibold);
 }
 
 .studio-p-copy span {
-  font-size: var(--text-micro);
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
 }
 
 .studio-p-ratio {
-  font-size: var(--text-micro);
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
   font-variant-numeric: tabular-nums;
 }
 
@@ -551,27 +551,27 @@ textarea.studio-copy {
 .studio-chips button {
   flex: 1;
   background: transparent;
-  border: 1px solid var(--gridline);
-  color: var(--text-muted);
+  border: 1px solid var(--line);
+  color: var(--text-3-aa);
   font: inherit;
-  font-size: var(--text-caption);
-  font-weight: 600;
-  padding: 6px;
-  border-radius: 7px;
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--weight-semibold);
+  padding: var(--space-2);
+  border-radius: var(--r-sm);
   cursor: pointer;
-  transition: color var(--motion-fast), border-color var(--motion-fast);
+  transition: color var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
 }
 
 .studio-chips button:hover {
-  color: var(--text-primary);
-  border-color: var(--baseline);
+  color: var(--text-1);
+  border-color: var(--line-strong);
 }
 
 /* actions */
 .studio-actions {
   position: sticky;
   bottom: 0;
-  background: linear-gradient(to top, var(--page-plane) 70%, transparent);
+  background: linear-gradient(to top, var(--canvas) 70%, transparent);
   padding-top: var(--space-3);
   display: flex;
   flex-direction: column;
@@ -582,16 +582,16 @@ textarea.studio-copy {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 13px;
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-caption);
-  color: var(--text-secondary);
+  padding: var(--space-3) var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-2);
 }
 
 .studio-cost.slim {
-  padding: 6px 12px;
+  padding: var(--space-2) var(--space-3);
   margin-left: auto;
 }
 
@@ -600,9 +600,9 @@ textarea.studio-copy {
 }
 
 .studio-cost b {
-  color: var(--series-8);
-  font-weight: 700;
-  font-size: var(--text-section);
+  color: var(--chart-4);
+  font-weight: var(--weight-bold);
+  font-size: var(--fs-h3);
   font-variant-numeric: tabular-nums;
 }
 
@@ -610,13 +610,13 @@ textarea.studio-copy {
   width: 100%;
   border: 0;
   font: inherit;
-  font-weight: 600;
-  font-size: var(--text-body);
-  padding: 12px;
-  border-radius: var(--radius-sm);
+  font-weight: var(--weight-semibold);
+  font-size: var(--fs-sm);
+  padding: var(--space-3);
+  border-radius: var(--r-sm);
   cursor: pointer;
   display: block;
-  transition: opacity var(--motion-fast);
+  transition: opacity var(--dur-2) var(--ease);
 }
 
 .studio-btn:disabled {
@@ -624,27 +624,39 @@ textarea.studio-copy {
   cursor: not-allowed;
 }
 
+/* One blue thing on this view: the prompt writer is the signature action.
+   The paid render action is the quiet near-black tier that turns blue on
+   hover, straight from the brand button grammar. */
 .studio-btn.ai {
-  background: linear-gradient(135deg, var(--series-1), var(--series-3));
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.studio-btn.ai:hover:not(:disabled) {
+  background: var(--accent-hover);
 }
 
 .studio-btn.pri {
-  background: var(--series-1);
-  color: #fff;
+  background: var(--ink);
+  color: var(--on-panel);
+}
+
+.studio-btn.pri:hover:not(:disabled) {
+  background: var(--accent);
 }
 
 .studio-btn.exp {
-  background: var(--status-good);
-  color: #fff;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  color: var(--text-1);
 }
 
 .studio-btn.gh {
   background: transparent;
-  border: 1px solid var(--baseline);
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  padding: 10px;
+  border: 1px solid var(--line-strong);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  padding: var(--space-3);
 }
 
 .studio-upsell .studio-btn {
@@ -653,31 +665,31 @@ textarea.studio-copy {
 
 /* messages */
 .studio-msg {
-  padding: 11px 13px;
-  border-radius: var(--radius-sm);
-  background: var(--surface-1);
-  border: 1px solid var(--border);
+  padding: var(--space-3) var(--space-3);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  border: 1px solid var(--line);
   margin-bottom: var(--space-4);
-  font-size: var(--text-sm);
+  font-size: var(--fs-sm);
   line-height: 1.5;
 }
 
 .studio-msg.run {
-  border-color: var(--series-1);
+  border-color: var(--accent);
 }
 
 .studio-msg.err {
-  border-color: var(--status-critical);
+  border-color: var(--danger);
 }
 
 .studio-msg.ok {
-  border-color: var(--status-good);
+  border-color: var(--success);
 }
 
 .studio-msg ul {
   margin: 7px 0 0 17px;
-  color: var(--text-secondary);
-  font-size: var(--text-caption);
+  color: var(--text-2);
+  font-size: var(--fs-eyebrow);
   padding: 0;
 }
 
@@ -700,24 +712,24 @@ textarea.studio-copy {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-size: var(--text-micro);
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
   gap: var(--space-2);
 }
 
 .studio-fh b {
-  color: var(--text-secondary);
-  font-weight: 600;
-  font-size: var(--text-caption);
+  color: var(--text-2);
+  font-weight: var(--weight-semibold);
+  font-size: var(--fs-eyebrow);
 }
 
 /* The canvas stays dark in both themes - renders read better on a stage. */
 .studio-canvas {
   position: relative;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-sm);
   overflow: hidden;
-  background: #15181d;
-  border: 1px solid var(--border);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
   cursor: pointer;
 }
 
@@ -729,7 +741,7 @@ textarea.studio-copy {
 }
 
 .studio-art.none {
-  background-image: repeating-linear-gradient(45deg, #1a1e24 0 10px, #171a20 10px 20px);
+  background-image: repeating-linear-gradient(45deg, var(--panel-2) 0 10px, var(--panel) 10px 20px);
 }
 
 .studio-unsafe {
@@ -748,12 +760,12 @@ textarea.studio-copy {
 }
 
 .studio-unsafe span {
-  font-size: 8px;
-  font-weight: 700;
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--weight-bold);
   color: rgba(255, 190, 170, 0.95);
   background: rgba(0, 0, 0, 0.45);
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px var(--space-2);
+  border-radius: var(--r-xs);
 }
 
 .studio-unsafe.t {
@@ -776,16 +788,16 @@ textarea.studio-copy {
   gap: var(--space-2);
   background: rgba(6, 7, 9, 0.78);
   text-align: center;
-  padding: 14px;
-  color: #e6e8ee;
-  font-size: var(--text-caption);
+  padding: var(--space-4);
+  color: var(--on-panel-2);
+  font-size: var(--fs-eyebrow);
 }
 
 .studio-veil i {
   width: 22px;
   height: 22px;
   border: 2px solid rgba(255, 255, 255, 0.22);
-  border-top-color: #fff;
+  border-top-color: var(--on-accent);
   border-radius: 50%;
   animation: studio-spin 0.8s linear infinite;
   font-style: normal;
@@ -802,55 +814,55 @@ textarea.studio-copy {
 }
 
 .studio-veil-err {
-  color: #ffd9d6;
+  color: var(--danger-soft);
 }
 
 .studio-veil button {
-  background: var(--status-critical);
+  background: var(--danger);
   border: 0;
-  color: #fff;
+  color: var(--on-accent);
   font: inherit;
-  font-weight: 600;
-  font-size: var(--text-caption);
-  padding: 7px 14px;
-  border-radius: 7px;
+  font-weight: var(--weight-semibold);
+  font-size: var(--fs-eyebrow);
+  padding: 7px var(--space-4);
+  border-radius: var(--r-sm);
   cursor: pointer;
 }
 
 .studio-st {
-  font-size: var(--text-micro);
-  font-weight: 700;
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--weight-bold);
   padding: 2px 7px;
-  border-radius: 5px;
+  border-radius: var(--r-sm);
   background: var(--surface-2);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
+  color: var(--text-3-aa);
+  border: 1px solid var(--line);
 }
 
 .studio-st.generating {
-  color: var(--series-1);
-  border-color: color-mix(in srgb, var(--series-1) 40%, transparent);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .studio-st.done {
-  color: var(--good-text);
-  border-color: color-mix(in srgb, var(--status-good) 40%, transparent);
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 40%, transparent);
 }
 
 .studio-st.error {
-  color: var(--status-critical);
-  border-color: color-mix(in srgb, var(--status-critical) 40%, transparent);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
 }
 
 .studio-edit-btn {
-  background: var(--series-1);
+  background: var(--ink);
   border: 0;
-  color: #fff;
+  color: var(--on-accent);
   font: inherit;
-  font-weight: 600;
-  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  font-size: var(--fs-eyebrow);
   padding: 3px 9px;
-  border-radius: 5px;
+  border-radius: var(--r-sm);
   cursor: pointer;
 }
 
@@ -865,38 +877,38 @@ textarea.studio-copy {
   width: 44px;
   height: 44px;
   object-fit: cover;
-  border-radius: 6px;
-  border: 1px solid var(--gridline);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
   cursor: pointer;
 }
 
 .studio-vlist img.on {
-  border-color: var(--series-1);
-  box-shadow: 0 0 0 1px var(--series-1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 .studio-pnote {
-  font-size: var(--text-micro);
-  color: var(--text-secondary);
-  background: color-mix(in srgb, var(--series-1) 8%, var(--surface-2));
-  border: 1px solid color-mix(in srgb, var(--series-1) 25%, transparent);
-  border-radius: 7px;
+  font-size: var(--fs-eyebrow);
+  color: var(--text-2);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: var(--r-sm);
   padding: 7px 9px;
   line-height: 1.45;
 }
 
 .studio-empty {
-  color: var(--text-muted);
+  color: var(--text-3-aa);
   text-align: center;
-  padding: 70px 20px;
+  padding: var(--space-8) var(--space-5);
   line-height: 1.6;
   width: 100%;
 }
 
 .studio-empty b {
   display: block;
-  color: var(--text-secondary);
-  font-size: var(--text-section);
+  color: var(--text-2);
+  font-size: var(--fs-h3);
   margin-bottom: 7px;
 }
 
@@ -909,7 +921,7 @@ textarea.studio-copy {
 
 .studio-skeleton-row {
   height: 40px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-sm);
 }
 
 /* library */
@@ -920,43 +932,43 @@ textarea.studio-copy {
 }
 
 .studio-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
   overflow: hidden;
-  background: var(--surface-1);
+  background: var(--surface);
   cursor: pointer;
   padding: 0;
   font: inherit;
   color: inherit;
   text-align: left;
-  transition: border-color var(--motion-fast);
+  transition: border-color var(--dur-2) var(--ease);
 }
 
 .studio-card:hover {
-  border-color: var(--series-1);
+  border-color: var(--accent);
 }
 
 .studio-card img,
 .studio-card video {
   width: 100%;
   display: block;
-  background: #000;
+  background: var(--panel);
   aspect-ratio: 4 / 3;
   object-fit: cover;
 }
 
 .studio-cap {
-  padding: 8px 10px;
-  font-size: var(--text-micro);
-  color: var(--text-muted);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
   display: flex;
   justify-content: space-between;
   gap: var(--space-2);
 }
 
 .studio-cap b {
-  color: var(--text-secondary);
-  font-weight: 600;
+  color: var(--text-2);
+  font-weight: var(--weight-semibold);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -977,34 +989,34 @@ textarea.studio-copy {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 26px;
+  padding: var(--space-5);
 }
 
 .studio-sheet {
   width: min(470px, 100%);
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--space-5);
   box-shadow: 0 24px 60px rgba(11, 11, 11, 0.35);
 }
 
 .studio-sheet h3 {
-  font-size: var(--text-section);
-  font-weight: 600;
+  font-size: var(--fs-h3);
+  font-weight: var(--weight-semibold);
   margin-bottom: 3px;
 }
 
 .studio-sheet-sub {
-  font-size: var(--text-caption);
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
   margin-bottom: var(--space-4);
   line-height: 1.45;
 }
 
 .studio-lines {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
   overflow: hidden;
   margin-bottom: var(--space-3);
 }
@@ -1013,9 +1025,9 @@ textarea.studio-copy {
   display: flex;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: 10px 13px;
-  font-size: var(--text-caption);
-  border-bottom: 1px solid var(--border);
+  padding: var(--space-3) var(--space-3);
+  font-size: var(--fs-eyebrow);
+  border-bottom: 1px solid var(--line);
 }
 
 .studio-ln:last-child {
@@ -1023,12 +1035,12 @@ textarea.studio-copy {
 }
 
 .studio-ln span {
-  color: var(--text-secondary);
+  color: var(--text-2);
 }
 
 .studio-ln b {
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   text-align: right;
 }
 
@@ -1037,25 +1049,25 @@ textarea.studio-copy {
 }
 
 .studio-ln.total b {
-  color: var(--series-8);
-  font-size: var(--text-section);
+  color: var(--chart-4);
+  font-size: var(--fs-h3);
 }
 
 .studio-ln.after b {
-  color: var(--good-text);
+  color: var(--success);
 }
 
 .studio-ln.after.bad b {
-  color: var(--status-critical);
+  color: var(--danger);
 }
 
 .studio-warnbar {
-  background: color-mix(in srgb, var(--status-warning) 12%, var(--surface-2));
-  border: 1px solid color-mix(in srgb, var(--status-warning) 35%, transparent);
-  color: var(--text-secondary);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  font-size: var(--text-caption);
+  background: color-mix(in srgb, var(--chart-4) 12%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--chart-4) 35%, transparent);
+  color: var(--text-2);
+  border-radius: var(--r-sm);
+  padding: var(--space-3) var(--space-3);
+  font-size: var(--fs-eyebrow);
   line-height: 1.45;
   margin-bottom: var(--space-3);
 }
@@ -1070,25 +1082,25 @@ textarea.studio-copy {
 .studio-review-foot button {
   flex: 1;
   font: inherit;
-  font-weight: 600;
-  padding: 12px;
-  border-radius: var(--radius-sm);
+  font-weight: var(--weight-semibold);
+  padding: var(--space-3);
+  border-radius: var(--r-sm);
   cursor: pointer;
   border: 0;
-  font-size: var(--text-sm);
+  font-size: var(--fs-sm);
 }
 
 .studio-sheet-acts .no,
 .studio-review-foot .no {
   background: transparent;
-  border: 1px solid var(--baseline);
-  color: var(--text-secondary);
+  border: 1px solid var(--line-strong);
+  color: var(--text-2);
 }
 
 .studio-sheet-acts .yes,
 .studio-review-foot .yes {
-  background: var(--series-1);
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .studio-sheet-acts .yes:disabled {
@@ -1100,7 +1112,7 @@ textarea.studio-copy {
 .studio-review {
   position: fixed;
   inset: 0;
-  background: var(--page-plane);
+  background: var(--canvas);
   z-index: 80;
   display: flex;
   flex-direction: column;
@@ -1110,20 +1122,20 @@ textarea.studio-copy {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: 16px 22px;
-  border-bottom: 1px solid var(--border);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--line);
   flex: none;
 }
 
 .studio-review-head h2 {
-  font-size: var(--text-page-title);
-  font-weight: 600;
+  font-size: var(--fs-h2);
+  font-weight: var(--weight-semibold);
 }
 
 .studio-review-body {
   flex: 1;
   overflow-y: auto;
-  padding: 22px;
+  padding: var(--space-5);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-5);
@@ -1137,9 +1149,9 @@ textarea.studio-copy {
 }
 
 .studio-pane {
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
   padding: var(--space-4);
 }
 
@@ -1148,9 +1160,9 @@ textarea.studio-copy {
 }
 
 .studio-pane h5 {
-  font-size: var(--text-micro);
-  font-weight: 600;
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--weight-semibold);
+  color: var(--text-3-aa);
   margin: 0 0 var(--space-3);
 }
 
@@ -1159,21 +1171,21 @@ textarea.studio-copy {
 }
 
 .studio-mine {
-  font-size: var(--text-body);
+  font-size: var(--fs-sm);
   line-height: 1.6;
-  color: var(--text-secondary);
+  color: var(--text-2);
   white-space: pre-wrap;
 }
 
 .studio-reason {
-  font-size: var(--text-sm);
+  font-size: var(--fs-sm);
   line-height: 1.6;
-  color: var(--series-1);
+  color: var(--accent);
 }
 
 .studio-review-prompt {
   min-height: 230px;
-  font-size: var(--text-sm);
+  font-size: var(--fs-sm);
   line-height: 1.6;
 }
 
@@ -1186,20 +1198,20 @@ textarea.studio-copy {
 .studio-pn {
   width: 190px;
   background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
   overflow: hidden;
 }
 
 .studio-pn-head {
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--border);
-  font-size: var(--text-micro);
-  font-weight: 600;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--weight-semibold);
 }
 
 .studio-pn-shape {
-  background: #15181d;
+  background: var(--panel-2);
   position: relative;
 }
 
@@ -1215,30 +1227,30 @@ textarea.studio-copy {
 }
 
 .studio-pn-text {
-  padding: 10px;
-  font-size: var(--text-micro);
+  padding: var(--space-3);
+  font-size: var(--fs-eyebrow);
   line-height: 1.5;
-  color: var(--text-secondary);
+  color: var(--text-2);
 }
 
 .studio-review-foot {
   flex: none;
   display: flex;
   gap: var(--space-3);
-  padding: 16px 22px;
-  border-top: 1px solid var(--border);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--line);
 }
 
 .studio-review-foot .no {
   flex: none;
-  padding: 12px 26px;
+  padding: var(--space-3) var(--space-5);
 }
 
 /* editor */
 .studio-editor {
   position: fixed;
   inset: 0;
-  background: var(--page-plane);
+  background: var(--canvas);
   z-index: 80;
   display: flex;
   flex-direction: column;
@@ -1248,30 +1260,30 @@ textarea.studio-copy {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--line);
   flex: none;
 }
 
 .studio-editor-head h2 {
-  font-size: var(--text-section);
-  font-weight: 600;
+  font-size: var(--fs-h3);
+  font-weight: var(--weight-semibold);
 }
 
 .studio-editor-chainlabel {
-  font-size: var(--text-caption);
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
 }
 
 .studio-editor-head button {
   margin-left: auto;
   background: transparent;
-  border: 1px solid var(--baseline);
-  color: var(--text-secondary);
+  border: 1px solid var(--line-strong);
+  color: var(--text-2);
   font: inherit;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
+  font-weight: var(--weight-semibold);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--r-sm);
   cursor: pointer;
 }
 
@@ -1286,7 +1298,7 @@ textarea.studio-copy {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 18px;
+  padding: var(--space-4);
   gap: var(--space-4);
   overflow: hidden;
 }
@@ -1294,8 +1306,8 @@ textarea.studio-copy {
 .studio-editor-right {
   width: 380px;
   flex: none;
-  border-left: 1px solid var(--border);
-  padding: 18px;
+  border-left: 1px solid var(--line);
+  padding: var(--space-4);
   overflow-y: auto;
 }
 
@@ -1314,7 +1326,7 @@ textarea.studio-copy {
   .studio-editor-right {
     width: 100%;
     border-left: 0;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--line);
   }
 }
 
@@ -1324,9 +1336,9 @@ textarea.studio-copy {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0b0d10;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
   overflow: hidden;
   position: relative;
 }
@@ -1334,7 +1346,7 @@ textarea.studio-copy {
 .studio-ba-single img {
   max-width: 100%;
   max-height: 64vh;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   display: block;
 }
 
@@ -1376,7 +1388,7 @@ textarea.studio-copy {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: #fff;
+  background: var(--on-panel);
   box-shadow: 0 0 14px rgba(0, 0, 0, 0.7);
   pointer-events: none;
 }
@@ -1390,29 +1402,29 @@ textarea.studio-copy {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--on-panel);
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
 }
 
 .studio-ba-tag {
   position: absolute;
-  top: 10px;
-  font-size: 10px;
-  font-weight: 700;
+  top: var(--space-3);
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--weight-bold);
   background: rgba(0, 0, 0, 0.66);
-  color: #fff;
-  padding: 4px 9px;
-  border-radius: 6px;
+  color: var(--on-accent);
+  padding: var(--space-1) 9px;
+  border-radius: var(--r-sm);
   z-index: 3;
 }
 
 .studio-ba-tag.l {
-  left: 10px;
+  left: var(--space-3);
 }
 
 .studio-ba-tag.r {
-  right: 10px;
-  color: #6ce9a6;
+  right: var(--space-3);
+  color: var(--success-soft);
 }
 
 .studio-hist {
@@ -1440,24 +1452,24 @@ textarea.studio-copy {
   width: 72px;
   height: 72px;
   object-fit: cover;
-  border-radius: var(--radius-sm);
-  border: 2px solid var(--gridline);
+  border-radius: var(--r-sm);
+  border: 2px solid var(--line);
   display: block;
 }
 
 .studio-hs.on img {
-  border-color: var(--series-1);
+  border-color: var(--accent);
 }
 
 .studio-hs span {
   font-size: 9.5px;
-  color: var(--text-muted);
+  color: var(--text-3-aa);
   display: block;
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 .studio-arr {
-  color: var(--text-muted);
+  color: var(--text-3-aa);
   flex: none;
 }
 
@@ -1479,7 +1491,7 @@ textarea.studio-copy {
 .studio-box video {
   max-width: min(1100px, 90vw);
   max-height: 70vh;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-md);
 }
 
 .studio-box-acts {
@@ -1492,17 +1504,17 @@ textarea.studio-copy {
 .studio-box-acts button {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  color: #fff;
+  color: var(--on-accent);
   font: inherit;
-  font-weight: 600;
-  padding: 10px 20px;
-  border-radius: var(--radius-sm);
+  font-weight: var(--weight-semibold);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--r-sm);
   cursor: pointer;
 }
 
 .studio-box-acts button.pri {
-  background: var(--series-1);
-  border-color: var(--series-1);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 /* drop curtain */
@@ -1513,19 +1525,19 @@ textarea.studio-copy {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--series-1) 14%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
   backdrop-filter: blur(3px);
-  border: 3px dashed var(--series-1);
+  border: 3px dashed var(--accent);
   pointer-events: none;
 }
 
 .studio-curtain div {
-  background: var(--surface-1);
-  border: 1px solid var(--series-1);
-  border-radius: var(--radius-md);
-  padding: 20px 28px;
-  font-size: var(--text-section);
-  font-weight: 600;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-md);
+  padding: var(--space-5) var(--space-6);
+  font-size: var(--fs-h3);
+  font-weight: var(--weight-semibold);
 }
 
 /* library wrapper keeps the message strip above the grid */

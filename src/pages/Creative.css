@@ -1,16 +1,16 @@
 /* Same page shell and 24px rhythm as every other tab. */
 .creative-page {
   min-height: 100vh;
-  background: var(--page-plane);
+  background: var(--canvas);
 }
 
 .creative-main {
-  max-width: 960px;
+  max-width: var(--container);
   margin: 0 auto;
-  padding: 24px 24px 64px;
+  padding: var(--space-5) var(--space-5) var(--space-8);
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-5);
 }
 
 .creative-head {
@@ -18,20 +18,20 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .creative-head h1 {
-  font-size: var(--text-page-title);
-  font-weight: 600;
+  font-size: var(--fs-h2);
+  font-weight: var(--weight-semibold);
   line-height: 1.2;
 }
 
 .creative-body {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  transition: opacity var(--motion-fast);
+  gap: var(--space-5);
+  transition: opacity var(--dur-2) var(--ease);
 }
 
 .creative-body.is-refreshing {
@@ -42,18 +42,18 @@
 .creative-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .creative-section h2 {
-  font-size: var(--text-section);
-  font-weight: 600;
+  font-size: var(--fs-h3);
+  font-weight: var(--weight-semibold);
   line-height: 1.2;
 }
 
 /* Performance table */
 .creative-table-card {
-  padding: 8px 20px;
+  padding: var(--space-2) var(--space-5);
 }
 
 .creative-table-scroll {
@@ -63,14 +63,14 @@
 .creative-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--text-sm);
+  font-size: var(--fs-sm);
 }
 
 .creative-table th,
 .creative-table td {
   text-align: right;
-  padding: 8px;
-  border-bottom: 1px solid var(--gridline);
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--line);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -81,35 +81,35 @@
 }
 
 .creative-table tbody tr {
-  transition: background-color var(--motion-fast);
+  transition: background-color var(--dur-2) var(--ease);
 }
 
 .creative-table tbody tr:hover {
-  background: color-mix(in srgb, var(--gridline) 35%, transparent);
+  background: color-mix(in srgb, var(--line) 35%, transparent);
 }
 
 .creative-table thead th {
-  font-size: var(--text-caption);
+  font-size: var(--fs-eyebrow);
 }
 
 .creative-table thead button {
   background: none;
   border: none;
-  padding: 4px 0;
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-size: var(--text-caption);
+  padding: var(--space-1) 0;
+  color: var(--text-2);
+  font-weight: var(--weight-medium);
+  font-size: var(--fs-eyebrow);
   cursor: pointer;
-  transition: color var(--motion-fast);
+  transition: color var(--dur-2) var(--ease);
 }
 
 .creative-table thead button:hover {
-  color: var(--text-primary);
+  color: var(--text-1);
 }
 
 .creative-table .creative-col-name {
   text-align: left;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   max-width: 280px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -119,11 +119,11 @@
 .preview-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .preview-card {
-  transition: border-color var(--motion-fast);
+  transition: border-color var(--dur-2) var(--ease);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -140,34 +140,34 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--series-1) 8%, var(--surface-2));
-  color: var(--series-1);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+  color: var(--accent);
 }
 
 .preview-copy {
-  padding: 16px;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .preview-name {
-  font-size: var(--text-caption);
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .preview-headline {
-  font-size: var(--text-card-title);
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-semibold);
   line-height: 1.35;
 }
 
 .preview-body {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -176,18 +176,18 @@
 }
 
 .preview-stats {
-  margin-top: 8px;
-  font-size: var(--text-caption);
-  color: var(--text-muted);
+  margin-top: var(--space-2);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
   font-variant-numeric: tabular-nums;
 }
 
 /* Loading */
 .creative-loading {
-  padding: 16px 20px;
+  padding: var(--space-4) var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .creative-skeleton-row {
@@ -208,7 +208,7 @@
 
 @media (max-width: 480px) {
   .creative-main {
-    padding: 16px 16px 48px;
+    padding: var(--space-4) var(--space-4) var(--space-7);
   }
 }
 
@@ -216,26 +216,26 @@
 .preview-platform {
   display: inline-flex;
   align-items: center;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  border-radius: 999px;
-  padding: 2px 8px;
-  margin-right: 8px;
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-eyebrow);
+  border-radius: var(--r-pill);
+  padding: 2px var(--space-2);
+  margin-right: var(--space-2);
   vertical-align: middle;
 }
 
 .preview-platform.meta {
-  color: var(--good-text);
-  background: color-mix(in srgb, var(--series-2) 12%, transparent);
+  color: var(--accent-strong);
+  background: var(--tint);
 }
 
 .preview-platform.google {
-  color: var(--series-1);
-  background: color-mix(in srgb, var(--series-1) 12%, transparent);
+  color: var(--chart-5);
+  background: color-mix(in srgb, var(--chart-5) 12%, transparent);
 }
 
 .creative-footnote {
-  font-size: var(--text-micro);
-  color: var(--text-muted);
+  font-size: var(--fs-eyebrow);
+  color: var(--text-3-aa);
 }

@@ -19,8 +19,8 @@ const CHANNELS = [
   { value: 'google', label: 'Google' }
 ];
 
-const RESULT_COLOR = 'var(--series-2)';
-const COST_COLOR = 'var(--series-8)';
+const RESULT_COLOR = 'var(--chart-1)';
+const COST_COLOR = 'var(--chart-4)';
 
 // The Pro visualization lineup - a teaser only; none of these are built
 // yet. Picking one shows what's coming, nothing more.

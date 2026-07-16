@@ -145,10 +145,10 @@ export default function TrendChart({ title, labels, values, color, formatValue =
             <path d={linePath} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
 
             {last && (
-              <circle cx={last.x} cy={last.y} r="4" fill={color} stroke="var(--surface-1)" strokeWidth="2" />
+              <circle cx={last.x} cy={last.y} r="4" fill={color} stroke="var(--surface)" strokeWidth="2" />
             )}
             {hovered && hoverIndex !== points.length - 1 && (
-              <circle cx={hovered.x} cy={hovered.y} r="4" fill={color} stroke="var(--surface-1)" strokeWidth="2" />
+              <circle cx={hovered.x} cy={hovered.y} r="4" fill={color} stroke="var(--surface)" strokeWidth="2" />
             )}
 
             {points.map((p, i) => (

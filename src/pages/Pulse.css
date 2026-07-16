@@ -1,16 +1,16 @@
 /* Same page shell and rhythm as every other tab. */
 .pulse-page {
   min-height: 100vh;
-  background: var(--page-plane);
+  background: var(--canvas);
 }
 
 .pulse-main {
-  max-width: 960px;
+  max-width: var(--container);
   margin: 0 auto;
-  padding: 24px 24px 64px;
+  padding: var(--space-5) var(--space-5) var(--space-8);
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-5);
 }
 
 .pulse-head {
@@ -18,43 +18,43 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .pulse-head h1 {
-  font-size: var(--text-page-title);
-  font-weight: 600;
+  font-size: var(--fs-h2);
+  font-weight: var(--weight-semibold);
   line-height: 1.2;
 }
 
 .pulse-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 16px;
+  gap: var(--space-4);
   align-items: start;
 }
 
 .pulse-off {
-  padding: 20px;
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .pulse-off p {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-medium);
 }
 
 .pulse-off-sub {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-body);
+  color: var(--text-2);
 }
 
 .pulse-off-sub a,
 .pulse-main .banner a {
-  color: var(--series-1);
+  color: var(--accent);
 }
 
 @media (max-width: 860px) {
@@ -65,6 +65,6 @@
 
 @media (max-width: 480px) {
   .pulse-main {
-    padding: 16px 16px 48px;
+    padding: var(--space-4) var(--space-4) var(--space-7);
   }
 }

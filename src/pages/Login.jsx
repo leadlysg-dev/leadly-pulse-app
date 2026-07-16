@@ -51,10 +51,36 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      <div className="login-card card">
-        <h1>{isLogin ? 'Log in to Leadly Pulse' : 'Create your Leadly Pulse account'}</h1>
+      <div className="login-split">
+        {/* The stage: the one dark object on the page. */}
+        <section className="stage-dark tex-dark login-stage" aria-hidden="true">
+          <div className="login-lockup">
+            <span className="login-mark" aria-hidden="true">
+              <svg viewBox="0 0 32 32" width="18" height="18">
+                <path
+                  d="M7 21 L13 13 L18 18 L25 8"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+            Leadly <span className="login-product">Pulse</span>
+          </div>
+          <h2 className="display login-display">
+            Every campaign, one&nbsp;pulse — <span className="accent">in plain English.</span>
+          </h2>
+          <p className="login-lead">
+            Meta, Google and local search in one quiet dashboard, with AI that tells you what changed and why.
+          </p>
+        </section>
 
-        <form onSubmit={handleSubmit}>
+        <div className="login-card card">
+          <h1>{isLogin ? 'Log in to Leadly Pulse' : 'Create your Leadly Pulse account'}</h1>
+
+          <form onSubmit={handleSubmit}>
           <label htmlFor="email">Email</label>
           <input
             id="email"
@@ -110,6 +136,7 @@ export default function Login() {
             {isLogin ? 'Create an account' : 'Log in'}
           </button>
         </p>
+        </div>
       </div>
     </div>
   );

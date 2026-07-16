@@ -106,7 +106,7 @@ export default function AiInsights({ range }) {
   }
 
   return (
-    <section className="ai-insights card" aria-label="AI insights">
+    <section className="ai-insights stage-dark tex-dark" aria-label="AI insights">
       <div className="ai-insights-head">
         <h2>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">

@@ -5,9 +5,9 @@ export default function ErrorState({ message, onRetry }) {
     <div className="error-state card" role="alert">
       <div className="error-state-icon" aria-hidden="true">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="var(--status-critical)" strokeWidth="2" />
-          <path d="M12 7v6" stroke="var(--status-critical)" strokeWidth="2" strokeLinecap="round" />
-          <circle cx="12" cy="16.5" r="1.2" fill="var(--status-critical)" />
+          <circle cx="12" cy="12" r="10" stroke="var(--danger)" strokeWidth="2" />
+          <path d="M12 7v6" stroke="var(--danger)" strokeWidth="2" strokeLinecap="round" />
+          <circle cx="12" cy="16.5" r="1.2" fill="var(--danger)" />
         </svg>
       </div>
       <div>

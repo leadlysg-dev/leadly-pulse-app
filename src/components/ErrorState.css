@@ -1,8 +1,8 @@
 .error-state {
-  padding: 24px;
+  padding: var(--space-5);
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
@@ -12,14 +12,14 @@
 }
 
 .error-state-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-semibold);
   margin-bottom: 2px;
 }
 
 .error-state-message {
-  font-size: 13px;
-  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
 }
 
 .error-state .btn {

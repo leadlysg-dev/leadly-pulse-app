@@ -2,25 +2,25 @@
 .chat-panel {
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  gap: 12px;
+  padding: var(--space-4);
+  gap: var(--space-3);
 }
 
 .chat-messages {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   overflow-y: auto;
   min-height: 280px;
   max-height: 480px;
-  padding: 4px;
+  padding: var(--space-1);
 }
 
 .chat-bubble {
   max-width: 85%;
-  padding: 10px 14px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--r-md);
+  font-size: var(--fs-sm);
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -28,30 +28,30 @@
 
 .chat-assistant {
   align-self: flex-start;
-  background: var(--gridline);
-  color: var(--text-primary);
+  background: var(--line);
+  color: var(--text-1);
   border-bottom-left-radius: 4px;
 }
 
 .chat-user {
   align-self: flex-end;
-  background: var(--series-1);
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
   border-bottom-right-radius: 4px;
 }
 
 /* Typing indicator */
 .chat-typing {
   display: inline-flex;
-  gap: 4px;
+  gap: var(--space-1);
   align-items: center;
 }
 
 .chat-typing span {
   width: 6px;
   height: 6px;
-  border-radius: 999px;
-  background: var(--text-muted);
+  border-radius: var(--r-pill);
+  background: var(--text-3-aa);
   animation: chat-typing-bounce 1.2s infinite ease-in-out;
 }
 
@@ -71,45 +71,45 @@
 .chat-suggestions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .chat-suggestion {
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   background: none;
-  color: var(--text-secondary);
-  font-size: 12px;
-  padding: 6px 12px;
-  border-radius: 999px;
+  color: var(--text-2);
+  font-size: var(--fs-eyebrow);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--r-pill);
   cursor: pointer;
   text-align: left;
-  transition: color var(--motion-fast), background-color var(--motion-fast);
+  transition: color var(--dur-2) var(--ease), background-color var(--dur-2) var(--ease);
 }
 
 .chat-suggestion:hover:not(:disabled) {
-  color: var(--text-primary);
-  background: var(--gridline);
+  color: var(--text-1);
+  background: var(--line);
 }
 
 .chat-input-row {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .chat-input-row input {
   flex: 1;
   min-width: 0;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-1);
-  color: var(--text-primary);
-  font-size: 14px;
-  transition: border-color var(--motion-fast);
+  padding: var(--space-3) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text-1);
+  font-size: var(--fs-sm);
+  transition: border-color var(--dur-2) var(--ease);
 }
 
 .chat-input-row input:focus {
-  outline: 2px solid var(--series-1);
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
