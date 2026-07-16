@@ -41,7 +41,8 @@ create table public.workspaces (
   id              uuid primary key default gen_random_uuid(),
   name            text not null,
   billing_exempt  boolean not null default false,
-  tracked_metrics jsonb,                        -- ids the Pulse tab keeps an eye on
+  tracked_metrics jsonb,                        -- superseded by metrics_config
+  metrics_config  jsonb,                        -- onboarding-set metrics (see migration 013)
   created_at      timestamptz not null default now()
 );
 
