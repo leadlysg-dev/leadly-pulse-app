@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
-import TopNav from '../components/TopNav';
 import './Upgrade.css';
 
 const PRO_FEATURES = [
@@ -41,7 +40,6 @@ export default function Upgrade() {
 
   return (
     <div className="upgrade-page">
-      <TopNav email={status?.email} />
       <main className="upgrade-main">
         <h1>Plans</h1>
         <div className="upgrade-grid">

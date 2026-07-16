@@ -61,11 +61,11 @@ const PAGES = [
   ['studio', tab('Studio', <StudioTab />)],
   ['crm', tab('CRM', <CrmTab />)],
   ['automations', tab('Automations', <AutomationsTab />)],
-  ['settings', <Settings />],
-  ['seo', <Seo />],
+  ['settings', tab('Settings', <Settings />)],
+  ['seo', tab('Local SEO', <Seo />)],
   ['select-account', <SelectAccount />],
   ['select-metrics', <SelectMetrics />],
-  ['upgrade', <Upgrade />]
+  ['upgrade', tab('Upgrade', <Upgrade />)]
 ];
 
 const LEGACY = [

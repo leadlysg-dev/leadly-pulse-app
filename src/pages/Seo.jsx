@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../lib/api';
 import { fmtDate, number } from '../lib/format';
-import TopNav from '../components/TopNav';
 import DateRangePicker, { REPORT_RANGES } from '../components/DateRangePicker';
 import Banner from '../components/Banner';
 import ErrorState from '../components/ErrorState';
@@ -166,7 +165,6 @@ export default function Seo() {
 
   return (
     <div className="seo-page">
-      <TopNav email={status?.email} />
 
       <main className="seo-main">
         <div className="seo-head">

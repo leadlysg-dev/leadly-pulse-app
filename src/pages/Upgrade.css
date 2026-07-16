@@ -1,6 +1,5 @@
 .upgrade-page {
-  min-height: 100vh;
-  background: var(--canvas);
+  background: transparent;
 }
 
 .upgrade-main {

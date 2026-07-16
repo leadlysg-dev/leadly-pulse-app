@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
-import TopNav from '../components/TopNav';
 import ErrorState from '../components/ErrorState';
 import './Settings.css';
 
@@ -181,7 +180,6 @@ export default function Settings() {
 
   return (
     <div className="settings-page">
-      <TopNav email={status?.email} />
 
       <main className="settings-main">
         <div className="settings-head">
