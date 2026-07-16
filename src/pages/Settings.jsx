@@ -436,7 +436,7 @@ export default function Settings() {
                         id="assistant-instructions"
                         rows={3}
                         maxLength={2000}
-                        placeholder="e.g. Only alert me about changes bigger than 20%, and keep messages short."
+                        placeholder="e.g. Only alert me about big swings, and keep messages short."
                         disabled={aiOff || !prefs.assistant.enabled}
                         value={prefs.assistant.instructions}
                         onChange={(e) =>
