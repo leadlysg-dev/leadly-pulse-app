@@ -1,4 +1,4 @@
-# AdPulse — setup guide
+# Leadly Pulse — setup guide
 
 This is a working starting point for a self-serve Meta + Google Ads reporting
 dashboard. Customers click "Connect", log in with their own Facebook/Google
@@ -28,7 +28,7 @@ This is the one-time registration that represents *your product* to Facebook.
 It is free.
 
 1. Go to https://developers.facebook.com/apps and click **Create App**.
-2. Choose type **Business**, give it a name like "AdPulse".
+2. Choose type **Business**, give it a name like "Leadly Pulse".
 3. In the app dashboard, click **Add Product** → find **Facebook Login** →
    **Set up**.
 4. Go to **Facebook Login → Settings**. Under "Valid OAuth Redirect URIs" add:
@@ -47,7 +47,7 @@ It is free.
 ## Part 3 — Create your Google Ads API access (15–20 min)
 
 1. Go to https://console.cloud.google.com and create a new project, e.g.
-   "AdPulse".
+   "Leadly Pulse".
 2. Go to **APIs & Services → OAuth consent screen**. Choose **External**,
    fill in the app name and your email, and save.
 3. Go to **APIs & Services → Credentials → Create Credentials → OAuth
@@ -82,6 +82,15 @@ It is free.
    - `SUPABASE_URL` → your Supabase project URL (Project Settings → API)
    - `SUPABASE_SECRET_KEY` → your Supabase secret/service key (never the
      public anon key)
+   - `FAL_KEY` → your fal.ai API key (fal.ai → API Keys) — powers the
+     Leadly Studio tab's image/video generation
+   - `FAL_ADMIN_KEY` (optional) → an admin-scoped fal key so the Studio can
+     show your remaining credit balance
+   - `ANTHROPIC_API_KEY` → already used by PulseAI insights; the Studio's
+     prompt writer reuses the same key
+   - `STUDIO_MOCK=1` (optional) → dry-run the whole Studio tab without
+     calling fal or Anthropic and without spending anything — useful for
+     a first walkthrough
 
    Before the first deploy with Supabase, run `supabase-schema.sql` (repo
    root) once in the Supabase SQL editor to create the tables. If you
