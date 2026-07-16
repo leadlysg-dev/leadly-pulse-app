@@ -158,6 +158,14 @@ async function listChangeRequests() {
   return [];
 }
 
+let blobMetricsConfig = null;
+async function getMetricsConfig() {
+  return blobMetricsConfig;
+}
+async function saveMetricsConfig(_, config) {
+  blobMetricsConfig = config;
+}
+
 let blobTracked = null; // single-tenant fallback: kept in the store blob namespace
 async function getTrackedMetrics() {
   return blobTracked;
@@ -228,6 +236,8 @@ module.exports = {
   listMemberships,
   getTrackedMetrics,
   saveTrackedMetrics,
+  getMetricsConfig,
+  saveMetricsConfig,
   workspaceOwnerEmail,
   createWorkspaceInvite,
   acceptWorkspaceInvite,

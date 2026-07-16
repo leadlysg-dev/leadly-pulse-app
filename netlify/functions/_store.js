@@ -100,6 +100,8 @@ module.exports = {
   deleteAlertRule: backend.deleteAlertRule,
   listMemberships: backend.listMemberships,
   getTrackedMetrics: backend.getTrackedMetrics,
+  getMetricsConfig: backend.getMetricsConfig,
+  saveMetricsConfig: backend.saveMetricsConfig,
   saveTrackedMetrics: backend.saveTrackedMetrics,
   workspaceOwnerEmail: backend.workspaceOwnerEmail,
   createWorkspaceInvite: backend.createWorkspaceInvite,

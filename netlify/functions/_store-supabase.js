@@ -375,6 +375,17 @@ async function listChangeRequests(workspaceId, limit = 100) {
   }));
 }
 
+async function getMetricsConfig(workspaceId) {
+  const { data, error } = await db().from('workspaces').select('metrics_config').eq('id', workspaceId).maybeSingle();
+  if (error) fail(error, 'loading metrics config');
+  return (data && data.metrics_config) || null;
+}
+
+async function saveMetricsConfig(workspaceId, config) {
+  const { error } = await db().from('workspaces').update({ metrics_config: config }).eq('id', workspaceId);
+  if (error) fail(error, 'saving metrics config');
+}
+
 async function getTrackedMetrics(workspaceId) {
   const { data, error } = await db().from('workspaces').select('tracked_metrics').eq('id', workspaceId).maybeSingle();
   if (error) fail(error, 'loading tracked metrics');
@@ -653,6 +664,8 @@ module.exports = {
   listMemberships,
   getTrackedMetrics,
   saveTrackedMetrics,
+  getMetricsConfig,
+  saveMetricsConfig,
   workspaceOwnerEmail,
   createWorkspaceInvite,
   acceptWorkspaceInvite,
