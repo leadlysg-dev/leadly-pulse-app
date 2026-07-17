@@ -83,7 +83,7 @@ function Ekg({ msg }) {
 /* ── The Pulse AI bar (this tab only) ─────────────────────────── */
 function PulseBar({ context }) {
   const { role, toast } = useShell();
-  const [chips, setChips] = useState(DEFAULT_CHIPS);
+  const [chips, setChips] = useState(null); // null = loading; render once, never swap mid-view
   const [phase, setPhase] = useState('idle');
   const [statusMsg, setStatusMsg] = useState(STEPS.today[0]);
   const [answer, setAnswer] = useState(null);
@@ -98,8 +98,8 @@ function PulseBar({ context }) {
   useEffect(() => {
     let cancelled = false;
     api.pulseChips().then((r) => {
-      if (!cancelled && Array.isArray(r.chips) && r.chips.length === 4) setChips(r.chips);
-    }).catch(() => {});
+      if (!cancelled) setChips(Array.isArray(r.chips) && r.chips.length === 4 ? r.chips : DEFAULT_CHIPS);
+    }).catch(() => !cancelled && setChips(DEFAULT_CHIPS));
     return () => {
       cancelled = true;
       clearTimers();
@@ -192,11 +192,13 @@ function PulseBar({ context }) {
       </div>
       <div className="pb-hint">Pulse answers on your ad data — insights, chart explanations, and setting alerts.</div>
       <div className="pb-tidbits">
-        {chips.map((c) => (
-          <button key={c.label} type="button" className={`qchip ${c.color}`} disabled={phase === 'loading'} onClick={() => run(c.key, c.label)}>
-            ✦ {c.label}
-          </button>
-        ))}
+        {chips === null
+          ? [150, 180, 165, 190].map((w, i) => <span key={i} className="qchip qchip-ghost" style={{ width: w }} aria-hidden="true" />)
+          : chips.map((c) => (
+              <button key={c.label} type="button" className={`qchip ${c.color}`} disabled={phase === 'loading'} onClick={() => run(c.key, c.label)}>
+                ✦ {c.label}
+              </button>
+            ))}
       </div>
       {phase !== 'idle' && (
         <div className="pb-answer">
