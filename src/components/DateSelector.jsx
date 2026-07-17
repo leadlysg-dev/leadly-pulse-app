@@ -57,7 +57,7 @@ function Month({ year, month, start, end, onPick }) {
   );
 }
 
-export default function DateSelector({ value, onChange, compare, onCompare }) {
+export default function DateSelector({ value, onChange, compare, onCompare, extras }) {
   const [open, setOpen] = useState(false);
   const [start, setStart] = useState(value.since || null);
   const [end, setEnd] = useState(value.until || null);
@@ -125,15 +125,18 @@ export default function DateSelector({ value, onChange, compare, onCompare }) {
         </svg>
       </button>
 
-      <button
-        type="button"
-        className={`sbtn sbtn-ghost sbtn-sm compare-toggle${compare ? ' on-dark' : ''}`}
-        aria-pressed={compare}
-        onClick={() => onCompare(!compare)}
-        title="Show change vs the previous period"
-      >
-        vs previous period
-      </button>
+      {onCompare && (
+        <button
+          type="button"
+          className={`sbtn sbtn-ghost sbtn-sm compare-toggle${compare ? ' on-dark' : ''}`}
+          aria-pressed={compare}
+          onClick={() => onCompare(!compare)}
+          title="Show change vs the previous period"
+        >
+          vs previous period
+        </button>
+      )}
+      {extras}
 
       {open && (
         <div className="cal-pop scard" role="dialog" aria-label="Custom date range">

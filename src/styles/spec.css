@@ -407,6 +407,18 @@ body::before,body::after{content:none}
 .adm-table .grp-open td{border-bottom:1px solid var(--line-soft)}
 .adm-table .grp-last td{border-bottom:2px solid var(--line)}
 .ad-thumb{width:28px;height:28px;border-radius:7px;flex-shrink:0;display:grid;place-items:center;color:#fff;font-size:9px;font-weight:800}
+
+/* ── Pulse performance tables: platform colour-coding ──
+   The Pulse tab blends platforms, so every row says whose it is: a
+   Meta-blue or Google-green left rail on the pinned cell plus a tinted
+   chip beside the name, carried through every nesting level. */
+.plat-chip{display:inline-flex;align-items:center;font-size:10px;font-weight:800;letter-spacing:.02em;border-radius:99px;padding:2px 8px;vertical-align:1px;margin-left:6px}
+.plat-chip.meta{color:var(--meta);background:rgba(24,119,242,.10)}
+.plat-chip.google{color:#1E8E3E;background:rgba(52,168,83,.14)}
+.perf-table tr.plat-meta td.pin{box-shadow:inset 3px 0 0 var(--meta)}
+.perf-table tr.plat-google td.pin{box-shadow:inset 3px 0 0 var(--google)}
+.perf-table .lvl-1.plat-meta .adm-name-cell,.perf-table .lvl-2.plat-meta .adm-name-cell{border-left-color:rgba(24,119,242,.45)}
+.perf-table .lvl-1.plat-google .adm-name-cell,.perf-table .lvl-2.plat-google .adm-name-cell{border-left-color:rgba(52,168,83,.5)}
 .filter-select{font:inherit;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:7px 10px}
 
 .qchip-ghost{height:29px;background:var(--line-soft);border:1px solid var(--line-soft);animation:pulse-skel 1.2s ease-in-out infinite;pointer-events:none}

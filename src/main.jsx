@@ -7,9 +7,8 @@ import Login from './pages/Login';
 import Invite from './pages/Invite';
 import Shell from './components/Shell';
 import PulseTab from './pages/app/PulseTab';
-import AdManagerTab from './pages/app/AdManagerTab';
+import CampaignsTab from './pages/app/CampaignsTab';
 import StudioTab from './pages/app/StudioTab';
-import CrmTab from './pages/app/CrmTab';
 import AutomationsTab from './pages/app/AutomationsTab';
 import Settings from './pages/Settings';
 import Seo from './pages/Seo';
@@ -57,9 +56,8 @@ const PAGES = [
   ['login', <Login />],
   ['invite', <Invite />],
   ['pulse', tab('Pulse', <PulseTab />)],
-  ['admanager', tab('Ad Manager', <AdManagerTab />)],
+  ['campaigns', tab('Campaigns', <CampaignsTab />)],
   ['studio', tab('Studio', <StudioTab />)],
-  ['crm', tab('CRM', <CrmTab />)],
   ['automations', tab('Automations', <AutomationsTab />)],
   ['settings', tab('Settings', <Settings />)],
   ['seo', tab('Local SEO', <Seo />)],
@@ -73,7 +71,9 @@ const LEGACY = [
   ['reports', '/pulse.html'],
   ['reporting', '/pulse.html'],
   ['assistant', '/pulse.html'],
-  ['manage', '/admanager.html'],
+  ['manage', '/campaigns.html'],
+  ['admanager', '/campaigns.html'],
+  ['crm', '/pulse.html'],
   ['creative', '/pulse.html']
 ];
 

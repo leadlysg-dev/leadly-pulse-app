@@ -98,7 +98,7 @@ export default function StudioTab() {
                     {g.name}
                   </div>
                   <div className="g-acts">
-                    <button type="button" className="sbtn sbtn-primary sbtn-sm">→ Ad Manager</button>
+                    <button type="button" className="sbtn sbtn-primary sbtn-sm">→ Campaigns</button>
                     <button type="button" className="sbtn sbtn-ghost sbtn-sm">Refine</button>
                   </div>
                 </div>

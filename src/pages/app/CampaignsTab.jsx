@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../../lib/api';
 import { useShell } from '../../components/Shell';
 import DateSelector, { toView } from '../../components/DateSelector';
 import TableControls, { filterPredicate } from '../../components/TableControls';
-import { masterColumns, nodeValue, formatCol, goodUpFor } from '../../lib/metrics';
+import { masterColumns, nodeValue, formatCol } from '../../lib/metrics';
 
 const money = (v) => 'S$' + (v || 0).toLocaleString('en-SG', { maximumFractionDigits: v >= 100 ? 0 : 2 });
 const LOCK_TIP = 'Managed by Leadly — ask Pulse to request a change';
@@ -50,44 +50,24 @@ function BudgetCell({ node, locked, busy, onBudget }) {
   );
 }
 
-function Delta({ pct, goodUp }) {
-  if (pct === null || pct === undefined || !isFinite(pct)) return null;
-  const good = goodUp === null ? null : pct >= 0 === goodUp;
-  const cls = good === null ? 'flat' : good ? 'up' : 'down';
-  return (
-    <span className={`delta delta-sm ${cls}`}>
-      {pct >= 0 ? '▲' : '▼'} {Math.abs(pct).toFixed(1)}%
-    </span>
-  );
-}
-
-// The matched-length window immediately before [since, until].
-function previousWindow(since, until) {
-  const DAY = 86400000;
-  const s = new Date(since + 'T00:00:00Z').getTime();
-  const u = new Date(until + 'T00:00:00Z').getTime();
-  const len = Math.round((u - s) / DAY) + 1;
-  const fmt = (t) => new Date(t).toISOString().slice(0, 10);
-  return { since: fmt(s - len * DAY), until: fmt(s - DAY) };
-}
-
-export default function AdManagerTab() {
+// The Campaigns tab: quick, client-safe actions on ONE platform at a time -
+// inline budgets, on/off switches, bulk pause. Nothing blends here; anything
+// creative or structural happens on the native platforms.
+export default function CampaignsTab() {
   const { status, role, toast } = useShell();
   const locked = role === 'client';
   const email = status?.email || '';
 
   const [range, setRange] = useState({ key: 'last_7d', label: 'Last 7 days' });
-  const [compare, setCompare] = useState(false);
   const [trees, setTrees] = useState(null); // { meta, google }
-  const [prevIndex, setPrevIndex] = useState(null); // "channel:id" -> metrics of the preceding period
   const [error, setError] = useState(null);
-  const [platform, setPlatform] = useState('all');
+  const [platform, setPlatform] = useState('meta');
+  const userPicked = useRef(false);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState([]);
   const [selected, setSelected] = useState(() => new Set());
   const [expanded, setExpanded] = useState(() => new Set());
   const [busy, setBusy] = useState(false);
-  const [newOpen, setNewOpen] = useState(false);
   const [accounts, setAccounts] = useState(null); // { meta:{id,name}, google:{id,name} }
   const [config, setConfig] = useState(null);
   // last-used sort persists per user
@@ -144,50 +124,20 @@ export default function AdManagerTab() {
     load();
   }, [load]);
 
-  // "vs previous period": fetch the matched-length preceding window's trees
-  // once per range and index every node's metrics by channel:id, so every
-  // cell can show its own delta - custom ranges included.
+  // Default to the platform with more spend in the selected range, until the
+  // user picks one themselves.
   useEffect(() => {
-    if (!compare || !trees) {
-      setPrevIndex(null);
-      return;
-    }
-    let cancelled = false;
-    const src = trees.meta?.state === 'ok' ? trees.meta : trees.google?.state === 'ok' ? trees.google : null;
-    if (!src || !src.since || !src.until) return;
-    const win = previousWindow(src.since, src.until);
-    Promise.all([
-      api.getManageTree(win, 'meta').catch(() => null),
-      api.getManageTree(win, 'google').catch(() => null)
-    ]).then(([m, g]) => {
-      if (cancelled) return;
-      const index = {};
-      const walk = (channel, nodes) => {
-        for (const nd of nodes || []) {
-          index[`${channel}:${nd.id}`] = nd.metrics || {};
-          walk(channel, nd.children);
-        }
-      };
-      if (m?.state === 'ok') walk('meta', m.campaigns);
-      if (g?.state === 'ok') walk('google', g.campaigns);
-      setPrevIndex(index);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [compare, trees]);
+    if (!trees || userPicked.current) return;
+    const spendOf = (t) => (t?.state === 'ok' ? (t.campaigns || []).reduce((a, c) => a + (c.metrics?.spend || 0), 0) : -1);
+    if (spendOf(trees.google) > spendOf(trees.meta)) setPlatform('google');
+  }, [trees]);
 
   const campaigns = useMemo(() => {
     if (!trees) return null;
-    const all = [];
-    for (const channel of ['meta', 'google']) {
-      const t = trees[channel];
-      if (t?.state === 'ok') {
-        for (const c of t.campaigns || []) all.push({ ...c, channel, accountName: t.accountName || channel, canManage: t.canManage });
-      }
-    }
-    return all;
-  }, [trees]);
+    const t = trees[platform];
+    if (t?.state !== 'ok') return [];
+    return (t.campaigns || []).map((c) => ({ ...c, channel: platform, accountName: t.accountName || platform, canManage: t.canManage }));
+  }, [trees, platform]);
 
   const accountNames = useMemo(() => [...new Set((campaigns || []).map((c) => c.accountName))], [campaigns]);
   const cols = useMemo(() => masterColumns(config), [config]);
@@ -197,7 +147,6 @@ export default function AdManagerTab() {
   const filterFields = useMemo(
     () => [
       { id: 'status', label: 'Status', kind: 'choice', options: [{ value: 'active', label: 'Live' }, { value: 'paused', label: 'Paused' }] },
-      { id: 'platform', label: 'Platform', kind: 'choice', options: [{ value: 'meta', label: 'Meta' }, { value: 'google', label: 'Google' }] },
       ...(accountNames.length > 1
         ? [{ id: 'account', label: 'Account', kind: 'choice', options: accountNames.map((n) => ({ value: n, label: n })) }]
         : []),
@@ -225,15 +174,12 @@ export default function AdManagerTab() {
   const visible = useMemo(() => {
     if (!campaigns) return [];
     const valueOf = (c, field) =>
-      field === 'status' ? c.status : field === 'platform' ? c.channel : field === 'account' ? c.accountName : field === 'campaign' ? c.name : nodeValue(colById[field], c, c.channel);
+      field === 'status' ? c.status : field === 'account' ? c.accountName : field === 'campaign' ? c.name : nodeValue(colById[field], c, c.channel);
     const keep = filterPredicate(filters, filterFields, valueOf);
     const rows = campaigns.filter(
-      (c) =>
-        (platform === 'all' || c.channel === platform) &&
-        keep(c) &&
-        (!search.trim() || c.name.toLowerCase().includes(search.trim().toLowerCase()))
+      (c) => keep(c) && (!search.trim() || c.name.toLowerCase().includes(search.trim().toLowerCase()))
     );
-    return sortNodes(rows, null);
+    return sortNodes(rows, platform);
   }, [campaigns, platform, search, filters, filterFields, sortNodes, colById]);
 
   const setSortCol = (col) =>
@@ -281,24 +227,22 @@ export default function AdManagerTab() {
     }
   };
 
-  // platform-aware "New campaign": deep-link into the connected account's
-  // native creator; a single connected platform skips the menu
-  const createOn = (channel) => {
-    setNewOpen(false);
+  // "New campaign" opens the CURRENT view's native creator, deep-linked to
+  // the workspace's ad account for that platform.
+  const createNew = () => {
     if (locked) {
-      api.changeRequestCreate({ request: `Please create a new ${channel === 'meta' ? 'Meta' : 'Google'} campaign for us.` })
+      api.changeRequestCreate({ request: `Please create a new ${platform === 'meta' ? 'Meta' : 'Google'} campaign for us.` })
         .then(() => toast('Sent to Leadly — they’ll set it up with you.'))
         .catch((err) => toast(err.message));
       return;
     }
-    const acct = accounts?.[channel];
+    const acct = accounts?.[platform];
     const url =
-      channel === 'meta'
+      platform === 'meta'
         ? `https://adsmanager.facebook.com/adsmanager/creation${acct ? `?act=${String(acct.id).replace(/^act_/, '')}` : ''}`
-        : 'https://ads.google.com/aw/campaigns/new';
+        : `https://ads.google.com/aw/campaigns/new${acct ? `?ocid=${encodeURIComponent(acct.id)}` : ''}`;
     window.open(url, '_blank', 'noopener');
   };
-  const connectedPlatforms = ['meta', 'google'].filter((p) => (p === 'meta' ? status?.metaConnected : status?.googleConnected));
 
   const nodeKey = (channel, id) => `${channel}:${id}`;
   const toggleExpand = (key) =>
@@ -331,16 +275,6 @@ export default function AdManagerTab() {
     return out;
   }, [visible, expanded, sortNodes]);
 
-  const cellDelta = (col, node, channel) => {
-    if (!compare || !prevIndex) return null;
-    const prevMetrics = prevIndex[nodeKey(channel, node.id)];
-    if (!prevMetrics) return null;
-    const cur = nodeValue(col, node, channel);
-    const prev = nodeValue(col, { metrics: prevMetrics }, channel);
-    if (cur == null || prev == null || prev <= 0) return null;
-    return ((cur - prev) / prev) * 100;
-  };
-
   const renderRow = ({ node, channel, canManage, depth, key, isOpen, grpLast, grpOpen }) => {
     const rowLocked = locked || !canManage;
     const entityType = node.type || (depth === 0 ? 'campaign' : depth === 1 ? (channel === 'meta' ? 'adset' : 'adgroup') : 'ad');
@@ -368,8 +302,7 @@ export default function AdManagerTab() {
               <div className="tname">{node.name}</div>
               {depth === 0 && (
                 <div className="tsub">
-                  <span className="plat"><span className={`dot ${channel}`} />{channel === 'meta' ? 'Meta' : 'Google'}</span>
-                  {' · '}{node.accountName}
+                  {node.accountName}
                   {node.children?.length ? ` · ${node.children.length} ${channel === 'meta' ? 'ad set' : 'ad group'}${node.children.length > 1 ? 's' : ''}` : ''}
                 </div>
               )}
@@ -380,16 +313,9 @@ export default function AdManagerTab() {
         <td className="num">
           <BudgetCell node={node} locked={rowLocked} busy={busy} onBudget={(v) => write(channel, node, entityType, 'set_budget', v)} />
         </td>
-        {cols.map((col) => {
-          const v = nodeValue(col, node, channel);
-          const pct = cellDelta(col, node, channel);
-          return (
-            <td key={col.id} className="num">
-              {formatCol(col, v)}
-              {pct != null && <div><Delta pct={pct} goodUp={goodUpFor(col)} /></div>}
-            </td>
-          );
-        })}
+        {cols.map((col) => (
+          <td key={col.id} className="num">{formatCol(col, nodeValue(col, node, channel))}</td>
+        ))}
         <td>
           <Switch on={isOn} locked={rowLocked} busy={busy} label={`${node.name} on or off`} onToggle={() => write(channel, node, entityType, 'set_status', isOn ? 'paused' : 'active')} />
         </td>
@@ -401,8 +327,8 @@ export default function AdManagerTab() {
     <>
       <div className="toolbar" style={{ marginBottom: 10 }}>
         <div className="seg" role="group" aria-label="Platform">
-          {[['all', 'All'], ['meta', 'Meta'], ['google', 'Google']].map(([id, label]) => (
-            <button key={id} type="button" className={platform === id ? 'on' : ''} onClick={() => setPlatform(id)}>{label}</button>
+          {[['meta', 'Meta'], ['google', 'Google']].map(([id, label]) => (
+            <button key={id} type="button" className={platform === id ? 'on' : ''} onClick={() => { userPicked.current = true; setPlatform(id); }}>{label}</button>
           ))}
         </div>
         <TableControls
@@ -413,40 +339,17 @@ export default function AdManagerTab() {
           fields={filterFields}
           placeholder="Search campaigns…"
         />
-        <div style={{ marginLeft: 'auto', position: 'relative' }}>
-          <button
-            type="button"
-            className="sbtn sbtn-primary"
-            onClick={() => {
-              if (connectedPlatforms.length === 1) return createOn(connectedPlatforms[0]);
-              setNewOpen((v) => !v);
-            }}
-          >
-            + New campaign ▾
-          </button>
-          {newOpen && (
-            <div className="scard" style={{ position: 'absolute', right: 0, top: 'calc(100% + 6px)', zIndex: 'var(--z-dropdown)', minWidth: 250, boxShadow: 'var(--shadow-pop)' }}>
-              {['meta', 'google'].map((p) => (
-                <button key={p} type="button" className="nav-item" style={{ color: 'var(--ink)' }} disabled={!connectedPlatforms.includes(p)} onClick={() => createOn(p)}>
-                  <span className={`dot ${p}`} />
-                  <span>
-                    <span style={{ display: 'block', fontWeight: 600 }}>Create on {p === 'meta' ? 'Meta' : 'Google'}</span>
-                    <span className="tsub">{accounts?.[p]?.name || (connectedPlatforms.includes(p) ? 'Connected account' : 'Not connected')}</span>
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <button type="button" className="sbtn sbtn-primary" style={{ marginLeft: 'auto' }} onClick={createNew}>
+          + New campaign
+        </button>
       </div>
 
-      <DateSelector value={range} onChange={setRange} compare={compare} onCompare={setCompare} />
+      <DateSelector value={range} onChange={setRange} />
 
       {selected.size > 0 && !locked && (
         <div className="bulkbar">
           <span>{selected.size} selected</span>
           <button type="button" className="sbtn sbtn-ghost sbtn-sm" disabled={busy} onClick={() => bulk('set_status', 'paused')}>Pause</button>
-          <button type="button" className="sbtn sbtn-ghost sbtn-sm" onClick={() => toast('Duplicate is coming soon.')}>Duplicate</button>
           <button type="button" className="sbtn sbtn-ghost sbtn-sm" disabled={busy}
             onClick={() => { const v = window.prompt('Set the daily budget for every selected campaign to (S$):'); const n = parseFloat(v); if (isFinite(n) && n > 0) bulk('set_budget', n); }}>
             Edit budgets
@@ -483,7 +386,9 @@ export default function AdManagerTab() {
                   <tr>
                     <td />
                     <td className="pin" colSpan={4 + cols.length}>
-                      <span className="section-sub">No campaigns match this view.</span>
+                      <span className="section-sub">
+                        {trees?.[platform]?.state === 'ok' ? 'No campaigns match this view.' : `${platform === 'meta' ? 'Meta' : 'Google'} isn’t connected for this workspace yet.`}
+                      </span>
                     </td>
                   </tr>
                 )}
@@ -492,9 +397,6 @@ export default function AdManagerTab() {
             </table>
           </div>
         </div>
-      )}
-      {compare && !prevIndex && campaigns && (
-        <p className="section-sub" style={{ marginTop: 8 }}>Fetching the previous period for comparison…</p>
       )}
       {locked && (
         <p className="section-sub" style={{ marginTop: 10 }}>

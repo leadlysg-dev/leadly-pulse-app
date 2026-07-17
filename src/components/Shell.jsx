@@ -43,27 +43,42 @@ const ICONS = {
 
 const TABS = [
   { id: 'pulse', to: '/pulse.html', label: 'Pulse' },
-  { id: 'admanager', to: '/admanager.html', label: 'Ad Manager' },
-  { id: 'studio', to: '/studio.html', label: 'Studio', soon: true },
-  { id: 'crm', to: '/crm.html', label: 'CRM', badge: '↗' },
-  { id: 'automations', to: '/automations.html', label: 'Automations', soon: true }
+  { id: 'admanager', to: '/campaigns.html', label: 'Campaigns' },
+  { id: 'crm', href: 'https://login.leadly.sg', label: 'CRM', badge: '↗' },
+  { id: 'automations', to: '/automations.html', label: 'Automations', soon: true },
+  { id: 'studio', to: '/studio.html', label: 'Studio', soon: true }
 ];
 
 function NavItems({ pathname, mobile }) {
-  return TABS.map((t) => (
-    <Link
-      key={t.id}
-      to={t.to}
-      className={`nav-item${pathname === t.to ? ' active' : ''}`}
-      role="tab"
-      aria-selected={pathname === t.to}
-    >
-      {ICONS[t.id]}
-      {mobile ? t.label : t.label}
-      {t.soon && !mobile && <span className="nav-badge soon">SOON</span>}
-      {t.badge && !mobile && <span className="nav-badge">{t.badge}</span>}
-    </Link>
-  ));
+  return TABS.map((t) => {
+    const inner = (
+      <>
+        {ICONS[t.id]}
+        {t.label}
+        {t.soon && !mobile && <span className="nav-badge soon">SOON</span>}
+        {t.badge && !mobile && <span className="nav-badge">{t.badge}</span>}
+      </>
+    );
+    // CRM lives on its own domain - the nav item is a plain external link
+    if (t.href) {
+      return (
+        <a key={t.id} href={t.href} target="_blank" rel="noopener noreferrer" className="nav-item" role="tab" aria-selected={false}>
+          {inner}
+        </a>
+      );
+    }
+    return (
+      <Link
+        key={t.id}
+        to={t.to}
+        className={`nav-item${pathname === t.to ? ' active' : ''}`}
+        role="tab"
+        aria-selected={pathname === t.to}
+      >
+        {inner}
+      </Link>
+    );
+  });
 }
 
 export default function Shell({ title, children }) {
@@ -202,11 +217,7 @@ export default function Shell({ title, children }) {
                 Google Ads
               </span>
             </div>
-            <div className="topbar-right">
-              <button type="button" className="sbtn sbtn-primary sbtn-sm" onClick={() => toast('Shareable report links are coming soon.')}>
-                Share report
-              </button>
-            </div>
+            <div className="topbar-right" />
           </header>
           <main className="content">
             <div className="tab-pane">{children}</div>
