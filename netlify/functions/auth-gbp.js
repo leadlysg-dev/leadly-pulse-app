@@ -2,6 +2,7 @@
 // from Google Ads) with the single business.manage scope. The redirect URI
 // is derived from the request host and must be registered on the OAuth
 // client: https://<host>/.netlify/functions/auth-gbp-callback
+const jwt = require('jsonwebtoken');
 const { getEmailFromRequest } = require('./_store');
 const { SCOPE } = require('./_gbp');
 
@@ -11,6 +12,8 @@ exports.handler = async (event) => {
     return { statusCode: 302, headers: { Location: '/login.html?next=connect-gbp' }, body: '' };
   }
   const host = event.headers.host;
+  const state = jwt.sign({ purpose: 'connect-gbp', email }, process.env.SESSION_SECRET, { expiresIn: '15m' });
+
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID,
     redirect_uri: `https://${host}/.netlify/functions/auth-gbp-callback`,
@@ -18,7 +21,7 @@ exports.handler = async (event) => {
     access_type: 'offline',
     prompt: 'consent',
     scope: SCOPE,
-    state: email
+    state
   });
   return {
     statusCode: 302,

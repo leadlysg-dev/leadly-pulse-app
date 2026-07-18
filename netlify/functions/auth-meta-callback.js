@@ -2,11 +2,36 @@
 // ad accounts this customer manages, and save it against their account. If they
 // manage more than one, they'll be sent to pick which one(s) to track.
 const fetch = require('node-fetch');
-const { getUser, saveUser, clearAiInsightCache } = require('./_store');
+const jwt = require('jsonwebtoken');
+const { getUser, saveUser, clearAiInsightCache, getEmailFromRequest } = require('./_store');
+
+// The OAuth state is a short-lived signed token minted at step 1, and the
+// connection only ever attaches to the LOGGED-IN session user - a copied,
+// forwarded or forged callback URL can never write to someone else's
+// account (the exact failure this replaces: raw emails rode in state).
+function resolveConnectEmail(event, purpose) {
+  const qs = event.queryStringParameters || {};
+  if (!qs.code || !qs.state) return { error: 'Missing code or state from the redirect.' };
+  let payload;
+  try {
+    payload = jwt.verify(qs.state, process.env.SESSION_SECRET);
+    if (payload.purpose !== purpose) throw new Error('wrong purpose');
+  } catch {
+    return { error: 'This connect link has expired - open Settings and press Connect again.' };
+  }
+  const sessionEmail = getEmailFromRequest(event.headers);
+  if (!sessionEmail) return { error: 'Please log in, then press Connect again.' };
+  if (sessionEmail !== payload.email) {
+    return { error: 'This connect link belongs to a different login. Press Connect from your own Settings.' };
+  }
+  return { email: sessionEmail };
+}
 
 exports.handler = async (event) => {
-  const { code, state: email } = event.queryStringParameters || {};
-  if (!code || !email) return { statusCode: 400, body: 'Missing code or state from Facebook redirect.' };
+  const resolved = resolveConnectEmail(event, 'connect-meta');
+  if (resolved.error) return { statusCode: 400, body: resolved.error };
+  const email = resolved.email;
+  const { code } = event.queryStringParameters || {};
 
   const tokenParams = new URLSearchParams({
     client_id: process.env.META_APP_ID,
