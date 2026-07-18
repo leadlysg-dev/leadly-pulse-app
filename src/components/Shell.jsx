@@ -225,8 +225,12 @@ export default function Shell({ title, children }) {
             <button
               type="button"
               className="acct"
-              onClick={() => (showAcctMenu ? setWsOpen((v) => !v) : (window.location.href = '/settings.html'))}
-              title={showAcctMenu ? 'Workspaces' : 'Account settings'}
+              onClick={() =>
+                // demo must never leave for the real settings page - a
+                // logged-in visitor would land on their own account there
+                isDemo ? toast(DEMO_MESSAGE) : showAcctMenu ? setWsOpen((v) => !v) : (window.location.href = '/settings.html')
+              }
+              title={isDemo ? 'Sample workspace' : showAcctMenu ? 'Workspaces' : 'Account settings'}
             >
               <div className="avatar">{initials}</div>
               <div>
@@ -234,9 +238,11 @@ export default function Shell({ title, children }) {
                 <div className="acct-plan">{planLine}</div>
               </div>
             </button>
-            <button type="button" className="ws-item" onClick={() => (window.location.href = '/settings.html')}>
-              Settings
-            </button>
+            {!isDemo && (
+              <button type="button" className="ws-item" onClick={() => (window.location.href = '/settings.html')}>
+                Settings
+              </button>
+            )}
             {isDemo ? (
               <a className="ws-item" href="/login.html">
                 Exit demo

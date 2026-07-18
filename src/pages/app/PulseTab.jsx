@@ -5,6 +5,7 @@ import { useShell } from '../../components/Shell';
 import DateSelector, { toView, DATE_PRESETS } from '../../components/DateSelector';
 import MetricsOnboarding from '../../components/MetricsOnboarding';
 import TableControls, { filterPredicate } from '../../components/TableControls';
+import TableScroll from '../../components/TableScroll';
 import {
   masterKpis,
   masterColumns,
@@ -579,7 +580,7 @@ function PerformanceBreakdown({ config, trees, platform, compare, prevIndex, ema
       {!trees && <div className="scard" style={{ padding: 24 }}><div className="skeleton" style={{ height: 120 }} /></div>}
       {trees && (
         <div className="scard" style={{ overflow: 'hidden' }}>
-          <div className="table-scroll">
+          <TableScroll>
             <table className="spec-table adm-table perf-table">
               <thead>
                 <tr>
@@ -622,8 +623,7 @@ function PerformanceBreakdown({ config, trees, platform, compare, prevIndex, ema
                             <div className="tname">{node.name} <PlatChip channel={channel} /></div>
                             {depth === 0 && (
                               <div className="tsub">
-                                {node.accountName}
-                                {node.children?.length ? ` · ${node.children.length} ${channel === 'meta' ? 'ad set' : 'ad group'}${node.children.length > 1 ? 's' : ''}` : ''}
+                                {node.children?.length ? `${node.children.length} ${channel === 'meta' ? 'ad set' : 'ad group'}${node.children.length > 1 ? 's' : ''}` : ''}
                               </div>
                             )}
                           </div>
@@ -644,7 +644,7 @@ function PerformanceBreakdown({ config, trees, platform, compare, prevIndex, ema
                 })}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         </div>
       )}
     </>
@@ -737,7 +737,7 @@ function CreativePerformance({ config, trees, email }) {
       {!ads && <div className="scard" style={{ padding: 24 }}><div className="skeleton" style={{ height: 120 }} /></div>}
       {ads && (
         <div className="scard" style={{ overflow: 'hidden' }}>
-          <div className="table-scroll">
+          <TableScroll>
             <table className="spec-table perf-table">
               <thead>
                 <tr>
@@ -780,7 +780,7 @@ function CreativePerformance({ config, trees, email }) {
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         </div>
       )}
     </>

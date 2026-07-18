@@ -3,6 +3,7 @@ import { api } from '../../lib/api';
 import { useShell } from '../../components/Shell';
 import DateSelector, { toView } from '../../components/DateSelector';
 import TableControls, { filterPredicate } from '../../components/TableControls';
+import TableScroll from '../../components/TableScroll';
 import { masterColumns, nodeValue, formatCol } from '../../lib/metrics';
 
 const money = (v) => 'S$' + (v || 0).toLocaleString('en-SG', { maximumFractionDigits: v >= 100 ? 0 : 2 });
@@ -300,10 +301,10 @@ export default function CampaignsTab() {
             {depth === 2 && <div className={`ad-thumb ${THUMBS[(node.id || '').length % THUMBS.length]}`}>AD</div>}
             <div>
               <div className="tname">{node.name}</div>
-              {depth === 0 && (
+              {/* one business, one account - the account name is noise here */}
+              {depth === 0 && node.children?.length > 0 && (
                 <div className="tsub">
-                  {node.accountName}
-                  {node.children?.length ? ` · ${node.children.length} ${channel === 'meta' ? 'ad set' : 'ad group'}${node.children.length > 1 ? 's' : ''}` : ''}
+                  {`${node.children.length} ${channel === 'meta' ? 'ad set' : 'ad group'}${node.children.length > 1 ? 's' : ''}`}
                 </div>
               )}
             </div>
@@ -364,7 +365,7 @@ export default function CampaignsTab() {
 
       {campaigns && (
         <div className="scard" style={{ overflow: 'hidden' }}>
-          <div className="table-scroll">
+          <TableScroll>
             <table className="spec-table adm-table">
               <thead>
                 <tr>
@@ -397,7 +398,7 @@ export default function CampaignsTab() {
                 {flatRows.map(renderRow)}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         </div>
       )}
       {locked && (
