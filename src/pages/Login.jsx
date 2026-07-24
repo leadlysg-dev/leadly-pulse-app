@@ -15,7 +15,7 @@ const GOOGLE_ERRORS = {
     'Something went wrong on our side finishing the Google sign-in. Please try again, or use your email and password.',
   'google-failed': "Something went wrong signing in with Google. Please try again, or use your email and password.",
   'google-no-account':
-    "There's no Leadly Pulse account for that Google email yet. Leadly Pulse is invite-only — ask your agency contact for an invite link."
+    "There's no account for that Google email, and it isn't on the allowed list for this internal tool."
 };
 
 export default function Login() {
@@ -24,6 +24,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(() => GOOGLE_ERRORS[params.get('error')] || '');
   const [submitting, setSubmitting] = useState(false);
+  const [mode, setMode] = useState('login'); // 'login' | 'signup'
 
   const next = params.get('next');
   const googleHref = `/.netlify/functions/login-google${next ? `?next=${encodeURIComponent(next)}` : ''}`;
@@ -33,7 +34,8 @@ export default function Login() {
     setError('');
     setSubmitting(true);
     try {
-      await api.login(email, password);
+      if (mode === 'signup') await api.signup(email, password);
+      else await api.login(email, password);
 
       const next = params.get('next');
       if (next === 'connect-meta') window.location.href = '/.netlify/functions/auth-meta';
@@ -66,15 +68,15 @@ export default function Login() {
             Leadly <span className="login-product">Pulse</span>
           </div>
           <h2 className="display login-display">
-            Every campaign, one&nbsp;pulse — <span className="accent">in plain English.</span>
+            Internal reporting — <span className="accent">Meta + Google Ads.</span>
           </h2>
           <p className="login-lead">
-            Meta, Google and local search in one quiet dashboard, with AI that tells you what changed and why.
+            The agency's internal dashboard for client ad data, with AI that tells you what changed and why.
           </p>
         </section>
 
         <div className="login-card card">
-          <h1>Log in to Leadly Pulse</h1>
+          <h1>{mode === 'signup' ? 'Create the internal account' : 'Log in to Leadly Pulse'}</h1>
 
           <form onSubmit={handleSubmit}>
           <label htmlFor="email">Email</label>
@@ -99,7 +101,7 @@ export default function Login() {
           />
 
           <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-            {submitting ? 'Please wait…' : 'Log in'}
+            {submitting ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Log in'}
           </button>
         </form>
 
@@ -119,11 +121,13 @@ export default function Login() {
           Sign in with Google
         </a>
 
-        {/* Invite-only: no public signup. Accounts are created through a
-            workspace invite link from the agency. */}
-        <p className="login-toggle">New here? Leadly Pulse is invite-only — ask your agency contact for an invite link.</p>
+        {/* Internal tool: account creation is limited to the emails in
+            ALLOWED_LOGIN_EMAILS (set in the environment). */}
         <p className="login-toggle">
-          Want a look around first? <a href="/demo">Explore the live demo with sample data</a>.
+          {mode === 'signup' ? 'Already set up? ' : 'First time here? '}
+          <button type="button" className="login-toggle-link" onClick={() => { setMode(mode === 'signup' ? 'login' : 'signup'); setError(''); }}>
+            {mode === 'signup' ? 'Log in instead' : 'Create the account'}
+          </button>
         </p>
         </div>
       </div>

@@ -16,7 +16,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const { hashPassword } = require('./_password');
 
-const PROVIDERS = ['meta', 'google', 'gbp'];
+const PROVIDERS = ['meta', 'google'];
 
 let client;
 function db() {
@@ -196,46 +196,6 @@ async function saveAiInsightCache(email, range, entry) {
 
 // --- Ad-management audit log ---
 
-async function createChangeLog(email, entry) {
-  const userId = await userIdFor(email);
-  const { error } = await db().from('ad_change_log').insert({
-    user_id: userId,
-    channel: entry.channel,
-    account_id: entry.accountId,
-    entity_type: entry.entityType,
-    entity_id: entry.entityId,
-    entity_name: entry.entityName || null,
-    action: entry.action,
-    old_value: entry.oldValue != null ? String(entry.oldValue) : null,
-    new_value: entry.newValue != null ? String(entry.newValue) : null,
-    api_result: entry.apiResult ? String(entry.apiResult).slice(0, 2000) : null
-  });
-  if (error) fail(error, 'writing the change log');
-}
-
-async function listChangeLog(email, limit = 100) {
-  const userId = await userIdFor(email);
-  const { data, error } = await db()
-    .from('ad_change_log')
-    .select('channel, account_id, entity_type, entity_id, entity_name, action, old_value, new_value, api_result, created_at')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) fail(error, 'loading the change log');
-  return (data || []).map((r) => ({
-    channel: r.channel,
-    accountId: r.account_id,
-    entityType: r.entity_type,
-    entityId: r.entity_id,
-    entityName: r.entity_name,
-    action: r.action,
-    oldValue: r.old_value,
-    newValue: r.new_value,
-    apiResult: r.api_result,
-    createdAt: r.created_at
-  }));
-}
-
 // --- Workspaces (multi-tenant, invite-only) ---
 // A workspace owns the ad connections; members are 'owner' (agency) or
 // 'client' (invited). Clients read their workspace's data through the
@@ -278,87 +238,10 @@ async function workspaceOwnerEmail(workspaceId) {
 
 // ---- Studio: platform keys, budgets, spend ledger, jobs ----
 
-async function getPlatformSetting(key) {
-  const { data, error } = await db().from('platform_settings').select('value').eq('key', key).maybeSingle();
-  if (error) fail(error, 'loading a platform setting');
-  return data ? data.value : null;
-}
-
-async function savePlatformSetting(key, value) {
-  const { error } = await db().from('platform_settings').upsert({ key, value, updated_at: new Date().toISOString() });
-  if (error) fail(error, 'saving a platform setting');
-}
-
-async function getWorkspaceStudio(workspaceId) {
-  const { data, error } = await db()
-    .from('workspaces')
-    .select('studio_enabled, studio_budget, brand_kit')
-    .eq('id', workspaceId)
-    .maybeSingle();
-  if (error) fail(error, 'loading studio settings');
-  return data
-    ? { enabled: !!data.studio_enabled, budget: Number(data.studio_budget || 0), brandKit: data.brand_kit || null }
-    : { enabled: false, budget: 0, brandKit: null };
-}
-
-async function setWorkspaceStudio(workspaceId, patch) {
-  const row = {};
-  if (patch.enabled !== undefined) row.studio_enabled = !!patch.enabled;
-  if (patch.budget !== undefined) row.studio_budget = Number(patch.budget) || 0;
-  if (patch.brandKit !== undefined) row.brand_kit = patch.brandKit;
-  const { error } = await db().from('workspaces').update(row).eq('id', workspaceId);
-  if (error) fail(error, 'saving studio settings');
-}
-
 const monthStartIso = () => {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 };
-
-async function addStudioSpend(workspaceId, jobId, amount, note) {
-  const { error } = await db().from('studio_spend').insert({ workspace_id: workspaceId, job_id: jobId, amount, note: note || null });
-  if (error) fail(error, 'recording studio spend');
-}
-
-async function getMonthSpend(workspaceId) {
-  const { data, error } = await db()
-    .from('studio_spend')
-    .select('amount')
-    .eq('workspace_id', workspaceId)
-    .gte('created_at', monthStartIso());
-  if (error) fail(error, 'loading studio spend');
-  return +(data || []).reduce((a, r) => a + Number(r.amount || 0), 0).toFixed(2);
-}
-
-async function getMonthSpendAll() {
-  const { data, error } = await db().from('studio_spend').select('workspace_id, amount').gte('created_at', monthStartIso());
-  if (error) fail(error, 'loading studio spend');
-  const by = {};
-  (data || []).forEach((r) => {
-    by[r.workspace_id] = +((by[r.workspace_id] || 0) + Number(r.amount || 0)).toFixed(2);
-  });
-  return by;
-}
-
-async function createStudioJob(row) {
-  const { data, error } = await db()
-    .from('studio_jobs')
-    .insert({
-      workspace_id: row.workspaceId,
-      created_by: row.createdBy || null,
-      status: row.status || 'queued',
-      cost: row.cost || 0,
-      model: row.model || null,
-      template_id: row.templateId || null,
-      spec: row.spec || null,
-      inputs: row.inputs || null,
-      placements: row.placements || null
-    })
-    .select('id')
-    .single();
-  if (error) fail(error, 'creating the studio job');
-  return data.id;
-}
 
 const jobRow = (d) =>
   d && {
@@ -375,101 +258,6 @@ const jobRow = (d) =>
     updatedAt: d.updated_at
   };
 
-async function getStudioJobById(jobId, workspaceId) {
-  const q = db().from('studio_jobs').select('*').eq('id', jobId);
-  const { data, error } = await (workspaceId ? q.eq('workspace_id', workspaceId) : q).maybeSingle();
-  if (error) fail(error, 'loading the studio job');
-  return jobRow(data);
-}
-
-async function updateStudioJob(jobId, patch) {
-  const row = { updated_at: new Date().toISOString() };
-  if (patch.status !== undefined) row.status = patch.status;
-  if (patch.spec !== undefined) row.spec = patch.spec;
-  if (patch.placements !== undefined) row.placements = patch.placements;
-  const { error } = await db().from('studio_jobs').update(row).eq('id', jobId);
-  if (error) fail(error, 'updating the studio job');
-}
-
-async function listStudioJobs(workspaceId, limit = 20) {
-  const { data, error } = await db()
-    .from('studio_jobs')
-    .select('*')
-    .eq('workspace_id', workspaceId)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) fail(error, 'listing studio jobs');
-  return (data || []).map(jobRow);
-}
-
-// Platform-level role check: is this user a Leadly platform admin?
-async function isPlatformAdmin(email) {
-  try {
-    const userId = await userIdFor(email);
-    const { data, error } = await db().from('user_roles').select('role').eq('user_id', userId).maybeSingle();
-    if (error) fail(error, 'checking platform role');
-    return !!data && data.role === 'platform_admin';
-  } catch {
-    return false; // migration 014 not run yet, or no such user
-  }
-}
-
-async function getWorkspaceById(workspaceId) {
-  const { data, error } = await db()
-    .from('workspaces')
-    .select('id, name, billing_exempt, managed')
-    .eq('id', workspaceId)
-    .maybeSingle();
-  if (error) fail(error, 'loading the workspace');
-  return data ? { id: data.id, name: data.name, billingExempt: data.billing_exempt, managed: data.managed !== false } : null;
-}
-
-// The admin directory: every workspace with its owner, member count,
-// connection health (through the owner's connections), and last activity.
-async function listAllWorkspaces() {
-  const [wsRes, memberRes, connRes, crRes] = await Promise.all([
-    db().from('workspaces').select('*').order('created_at', { ascending: true }),
-    db().from('workspace_members').select('workspace_id, role, created_at, users ( id, email )'),
-    db().from('connected_accounts').select('user_id, provider, selected_ad_account_id'),
-    db().from('change_requests').select('workspace_id, created_at').order('created_at', { ascending: false }).limit(500)
-  ]);
-  for (const r of [wsRes, memberRes, connRes, crRes]) if (r.error) fail(r.error, 'loading the workspace directory');
-
-  const membersByWs = {};
-  (memberRes.data || []).forEach((m) => {
-    (membersByWs[m.workspace_id] = membersByWs[m.workspace_id] || []).push(m);
-  });
-  const connsByUser = {};
-  (connRes.data || []).forEach((c) => {
-    (connsByUser[c.user_id] = connsByUser[c.user_id] || {})[c.provider] = !!c.selected_ad_account_id;
-  });
-  const lastCrByWs = {};
-  (crRes.data || []).forEach((c) => {
-    if (!lastCrByWs[c.workspace_id]) lastCrByWs[c.workspace_id] = c.created_at;
-  });
-
-  return (wsRes.data || []).map((w) => {
-    const members = (membersByWs[w.id] || []).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    const owner = members.find((m) => m.role === 'owner');
-    const conns = (owner && owner.users && connsByUser[owner.users.id]) || {};
-    const activity = [w.created_at, ...members.map((m) => m.created_at), lastCrByWs[w.id]].filter(Boolean).sort();
-    return {
-      id: w.id,
-      name: w.name,
-      billingExempt: w.billing_exempt,
-      managed: w.managed !== false,
-      createdAt: w.created_at,
-      ownerEmail: owner && owner.users ? owner.users.email : null,
-      memberCount: members.length,
-      meta: conns.meta === true ? 'ok' : conns.meta === false ? 'partial' : 'off',
-      google: conns.google === true ? 'ok' : conns.google === false ? 'partial' : 'off',
-      studioEnabled: w.studio_enabled === true,
-      studioBudget: Number(w.studio_budget || 0),
-      lastActivity: activity[activity.length - 1] || w.created_at
-    };
-  });
-}
-
 async function createWorkspace(name, managed) {
   const { data, error } = await db()
     .from('workspaces')
@@ -480,48 +268,6 @@ async function createWorkspace(name, managed) {
   return { id: data.id, name: data.name, managed: data.managed !== false };
 }
 
-// Every admin visit into a client workspace is a logged session.
-async function createAdminSession(adminEmail, workspaceId) {
-  const userId = await userIdFor(adminEmail);
-  const { data, error } = await db()
-    .from('admin_sessions')
-    .insert({ admin_user_id: userId, workspace_id: workspaceId })
-    .select('id')
-    .single();
-  if (error) fail(error, 'logging the admin session');
-  return data.id;
-}
-
-async function endAdminSessions(adminEmail) {
-  const userId = await userIdFor(adminEmail);
-  const { error } = await db()
-    .from('admin_sessions')
-    .update({ ended_at: new Date().toISOString() })
-    .eq('admin_user_id', userId)
-    .is('ended_at', null);
-  if (error) fail(error, 'ending the admin session');
-}
-
-// Best-effort audit trail; failures never block the action they describe.
-async function writeAudit(actorEmail, action, workspaceId, detail) {
-  try {
-    const userId = actorEmail ? await userIdFor(actorEmail) : null;
-    await db().from('audit_log').insert({ actor_user_id: userId, action, workspace_id: workspaceId || null, detail: detail || null });
-  } catch (err) {
-    console.error(`[store] audit write failed: ${err.message}`);
-  }
-}
-
-async function listWorkspaceMembers(workspaceId) {
-  const { data, error } = await db()
-    .from('workspace_members')
-    .select('role, created_at, users ( email )')
-    .eq('workspace_id', workspaceId)
-    .order('created_at', { ascending: true });
-  if (error) fail(error, 'loading workspace members');
-  return (data || []).map((m) => ({ email: m.users ? m.users.email : null, role: m.role, addedAt: m.created_at }));
-}
-
 async function addWorkspaceMember(workspaceId, email, role) {
   const user = await getUser(email.toLowerCase());
   if (!user) throw new Error('No Pulse account with that email yet — send them an invite link instead.');
@@ -529,156 +275,6 @@ async function addWorkspaceMember(workspaceId, email, role) {
     .from('workspace_members')
     .upsert({ workspace_id: workspaceId, user_id: user.id, role }, { onConflict: 'workspace_id,user_id' });
   if (error) fail(error, 'adding the member');
-}
-
-async function removeWorkspaceMember(workspaceId, email) {
-  const userId = await userIdFor(email.toLowerCase());
-  const { data: owners, error: oErr } = await db()
-    .from('workspace_members')
-    .select('user_id')
-    .eq('workspace_id', workspaceId)
-    .eq('role', 'owner');
-  if (oErr) fail(oErr, 'checking owners');
-  if ((owners || []).length === 1 && owners[0].user_id === userId) {
-    throw new Error("You can't remove the workspace's only owner.");
-  }
-  const { error } = await db().from('workspace_members').delete().eq('workspace_id', workspaceId).eq('user_id', userId);
-  if (error) fail(error, 'removing the member');
-}
-
-// Mint a single-use invite carrying its intended role. A fresh owner invite
-// invalidates any unused prior owner invite for the same workspace. Allowed
-// for workspace owners, agency members, and platform admins.
-async function createWorkspaceInvite(email, workspaceId, role = 'client') {
-  const userId = await userIdFor(email);
-  const { data: member, error: mErr } = await db()
-    .from('workspace_members')
-    .select('role')
-    .eq('workspace_id', workspaceId)
-    .eq('user_id', userId)
-    .maybeSingle();
-  if (mErr) fail(mErr, 'checking workspace role');
-  const allowed = (member && (member.role === 'owner' || member.role === 'agency')) || (await isPlatformAdmin(email));
-  if (!allowed) throw new Error('Only a workspace owner or Leadly can create invite links.');
-  if (!['owner', 'agency', 'client', 'member'].includes(role)) throw new Error('Unknown invite role.');
-
-  if (role === 'owner') {
-    const { error: delErr } = await db()
-      .from('workspace_invites')
-      .delete()
-      .eq('workspace_id', workspaceId)
-      .eq('role', 'owner')
-      .is('used_by', null);
-    if (delErr) fail(delErr, 'invalidating the previous owner invite');
-  }
-
-  const token = require('crypto').randomBytes(24).toString('base64url');
-  const { error } = await db().from('workspace_invites').insert({
-    token,
-    workspace_id: workspaceId,
-    created_by: userId,
-    role,
-    expires_at: new Date(Date.now() + 7 * 86400000).toISOString()
-  });
-  if (error) fail(error, 'creating the invite');
-  return token;
-}
-
-// Peek at an invite without claiming it - drives the accept page's states.
-async function getWorkspaceInvite(token) {
-  const { data, error } = await db()
-    .from('workspace_invites')
-    .select('workspace_id, used_by, expires_at, role, workspaces ( name )')
-    .eq('token', token)
-    .maybeSingle();
-  if (error) fail(error, 'reading the invite');
-  if (!data) return null;
-  return {
-    workspaceId: data.workspace_id,
-    workspaceName: data.workspaces ? data.workspaces.name : null,
-    role: data.role || 'client',
-    used: !!data.used_by,
-    expired: new Date(data.expires_at) < new Date()
-  };
-}
-
-// Single use: the row is claimed with a guarded update, so two concurrent
-// accepts can't both succeed. opts.viaGoogle creates the account without a
-// password (Google's verified email is the proof of identity).
-async function acceptWorkspaceInvite(token, email, password, opts = {}) {
-  const { data: invite, error } = await db()
-    .from('workspace_invites')
-    .select('workspace_id, used_by, expires_at, role')
-    .eq('token', token)
-    .maybeSingle();
-  if (error) fail(error, 'reading the invite');
-  if (!invite) throw new Error('That invite link is not valid.');
-  if (invite.used_by) throw new Error('That invite link has already been used.');
-  if (new Date(invite.expires_at) < new Date()) throw new Error('That invite link has expired.');
-
-  let user = await getUser(email);
-  let created = false;
-  if (!user) {
-    user = opts.viaGoogle
-      ? await createUser(email, require('crypto').randomBytes(24).toString('hex'), { passwordSet: false })
-      : await createUser(email, password);
-    created = true;
-  }
-
-  const { data: claimed, error: claimErr } = await db()
-    .from('workspace_invites')
-    .update({ used_by: user.id, used_at: new Date().toISOString() })
-    .eq('token', token)
-    .is('used_by', null)
-    .select('workspace_id')
-    .maybeSingle();
-  if (claimErr) fail(claimErr, 'claiming the invite');
-  if (!claimed) throw new Error('That invite link has already been used.');
-
-  const role = ['owner', 'agency', 'client', 'member'].includes(invite.role) ? invite.role : 'client';
-  const { error: memberErr } = await db()
-    .from('workspace_members')
-    .upsert(
-      { workspace_id: invite.workspace_id, user_id: user.id, role },
-      { onConflict: 'workspace_id,user_id', ignoreDuplicates: true }
-    );
-  if (memberErr) fail(memberErr, 'adding you to the workspace');
-  return { workspaceId: invite.workspace_id, created, role };
-}
-
-async function createChangeRequest(email, workspaceId, payload) {
-  const userId = await userIdFor(email);
-  const { error } = await db().from('change_requests').insert({
-    workspace_id: workspaceId,
-    requested_by: userId,
-    request: String(payload.request || '').slice(0, 2000),
-    entity_type: payload.entityType || null,
-    entity_id: payload.entityId || null,
-    action: payload.action || null,
-    value: payload.value != null ? String(payload.value) : null
-  });
-  if (error) fail(error, 'saving the change request');
-}
-
-async function listChangeRequests(workspaceId, limit = 100) {
-  const { data, error } = await db()
-    .from('change_requests')
-    .select('id, request, entity_type, entity_id, action, value, status, created_at, users:requested_by ( email )')
-    .eq('workspace_id', workspaceId)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) fail(error, 'loading change requests');
-  return (data || []).map((r) => ({
-    id: r.id,
-    request: r.request,
-    entityType: r.entity_type,
-    entityId: r.entity_id,
-    action: r.action,
-    value: r.value,
-    status: r.status,
-    requestedBy: r.users ? r.users.email : null,
-    createdAt: r.created_at
-  }));
 }
 
 async function getMetricsConfig(workspaceId) {
@@ -720,23 +316,6 @@ async function putStudioRecord(email, kind, id, record) {
   if (error) fail(error, `saving studio ${kind}`);
 }
 
-// opts.idPrefix narrows jobs to one project (job ids start with the project
-// slug); opts.limit caps the result. Newest first.
-async function listStudioRecords(email, kind, opts = {}) {
-  const userId = await userIdFor(email);
-  let query = db()
-    .from('studio_records')
-    .select('id, data')
-    .eq('user_id', userId)
-    .eq('kind', kind)
-    .order('updated_at', { ascending: false })
-    .limit(opts.limit || 100);
-  if (opts.idPrefix) query = query.like('id', `${opts.idPrefix}%`);
-  const { data, error } = await query;
-  if (error) fail(error, `listing studio ${kind}s`);
-  return (data || []).map((r) => r.data);
-}
-
 // --- Alert rules (created by the AI assistant) ---
 
 async function userIdFor(email) {
@@ -762,56 +341,6 @@ function assembleRule(row) {
     description: row.description,
     createdAt: row.created_at
   };
-}
-
-async function listAlertRules(email) {
-  const userId = await userIdFor(email);
-  const { data, error } = await db()
-    .from('alert_rules')
-    .select('id, metric, channel, comparison, threshold, timeframe, enabled, description, created_at')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-  if (error) fail(error, 'loading alert rules');
-  return (data || []).map(assembleRule);
-}
-
-async function createAlertRule(email, rule) {
-  const userId = await userIdFor(email);
-  const { data, error } = await db()
-    .from('alert_rules')
-    .insert({
-      user_id: userId,
-      metric: rule.metric,
-      channel: rule.channel,
-      comparison: rule.comparison,
-      threshold: rule.threshold,
-      timeframe: rule.timeframe,
-      description: rule.description
-    })
-    .select('id, metric, channel, comparison, threshold, timeframe, enabled, description, created_at')
-    .single();
-  if (error) fail(error, 'saving alert rule');
-  return assembleRule(data);
-}
-
-async function updateAlertRule(email, ruleId, enabled) {
-  const userId = await userIdFor(email);
-  const { error } = await db()
-    .from('alert_rules')
-    .update({ enabled })
-    .eq('id', ruleId)
-    .eq('user_id', userId); // scoped so one user can never touch another's rule
-  if (error) fail(error, 'updating alert rule');
-}
-
-async function deleteAlertRule(email, ruleId) {
-  const userId = await userIdFor(email);
-  const { error } = await db()
-    .from('alert_rules')
-    .delete()
-    .eq('id', ruleId)
-    .eq('user_id', userId);
-  if (error) fail(error, 'deleting alert rule');
 }
 
 // Persists the (mutated) user object. Provider rows are upserted and their
@@ -930,43 +459,12 @@ module.exports = {
   getAiInsightCache,
   saveAiInsightCache,
   clearAiInsightCache,
-  createChangeLog,
-  listChangeLog,
   getStudioRecord,
   putStudioRecord,
-  listStudioRecords,
   listMemberships,
   getMetricsConfig,
   saveMetricsConfig,
   workspaceOwnerEmail,
-  isPlatformAdmin,
-  getPlatformSetting,
-  savePlatformSetting,
-  getWorkspaceStudio,
-  setWorkspaceStudio,
-  addStudioSpend,
-  getMonthSpend,
-  getMonthSpendAll,
-  createStudioJob,
-  getStudioJobById,
-  updateStudioJob,
-  listStudioJobs,
-  getWorkspaceById,
-  listAllWorkspaces,
   createWorkspace,
-  createAdminSession,
-  endAdminSessions,
-  writeAudit,
-  listWorkspaceMembers,
-  addWorkspaceMember,
-  removeWorkspaceMember,
-  getWorkspaceInvite,
-  createWorkspaceInvite,
-  acceptWorkspaceInvite,
-  createChangeRequest,
-  listChangeRequests,
-  listAlertRules,
-  createAlertRule,
-  updateAlertRule,
-  deleteAlertRule
+  addWorkspaceMember
 };

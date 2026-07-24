@@ -29,13 +29,13 @@ const STEPS = {
   today: ['Adding up today’s numbers…', 'Checking Facebook and Google…', 'Comparing with your usual week…'],
   cpl: ['Working out your cost per lead…', 'Checking each ad…', 'Comparing this week to last…'],
   best: ['Lining up all your ads…', 'Checking cost and results…', 'Picking the winner…'],
-  alert: ['Looking at where things usually go wrong…', 'Setting up the watch…']
+  spend: ['Adding up the budget…', 'Checking where it went…']
 };
 const DEFAULT_CHIPS = [
   { key: 'today', color: 'c-green', label: 'How did my ads do today?' },
   { key: 'cpl', color: 'c-cobalt', label: 'What’s my cost per lead?' },
   { key: 'best', color: 'c-purple', label: 'Which ad is doing best?' },
-  { key: 'alert', color: 'c-amber', label: 'Warn me if something goes wrong' }
+  { key: 'spend', color: 'c-amber', label: 'Where is the budget going?' }
 ];
 const THUMBS = ['t1', 't2', 't3', 't4', 't5', 't6'];
 
@@ -98,7 +98,7 @@ function previousWindow(since, until) {
 
 /* ── The Pulse AI bar (this tab only) ─────────────────────────── */
 function PulseBar({ context }) {
-  const { role, toast } = useShell();
+  const { role } = useShell();
   const [chips, setChips] = useState(null); // null = loading; render once, never swap mid-view
   const [phase, setPhase] = useState('idle');
   const [statusMsg, setStatusMsg] = useState(STEPS.today[0]);
@@ -162,26 +162,8 @@ function PulseBar({ context }) {
     [phase, context, role]
   );
 
-  const act = async (a) => {
-    if (a.kind === 'admanager') return (window.location.href = '/campaigns.html');
-    if (a.kind === 'studio') return (window.location.href = '/studio.html');
-    if (a.kind === 'create_alert' && answer?.alert) {
-      try {
-        await api.createAlert(answer.alert);
-        toast('Done — I’ll warn you the moment it happens.');
-      } catch (err) {
-        toast(err.message);
-      }
-      return;
-    }
-    if (a.kind === 'change_request') {
-      try {
-        await api.changeRequestCreate({ request: a.request || question || typed.slice(0, 200) });
-        toast('Sent to Leadly — they’ll action it shortly.');
-      } catch (err) {
-        toast(err.message);
-      }
-    }
+  const act = (a) => {
+    if (a.kind === 'admanager') window.location.href = '/campaigns.html';
   };
 
   return (
@@ -206,7 +188,7 @@ function PulseBar({ context }) {
           </button>
         </div>
       </div>
-      <div className="pb-hint">Pulse answers on your ad data — insights, chart explanations, and setting alerts.</div>
+      <div className="pb-hint">Pulse answers on your ad data — insights and chart explanations.</div>
       <div className="pb-tidbits">
         {chips === null
           ? [150, 180, 165, 190].map((w, i) => <span key={i} className="qchip qchip-ghost" style={{ width: w }} aria-hidden="true" />)

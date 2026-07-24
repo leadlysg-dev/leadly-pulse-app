@@ -1,12 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
-import { useDemo } from '../demo/DemoContext';
-import { DEMO_MESSAGE, DEMO_BLOCKED_EVENT } from '../demo/constants';
 
-// The five-tab dashboard shell from the v5 UI spec: 232px dark sidebar,
-// sticky blurred topbar with connection chips + date range + share, account
-// footer with the workspace switcher (owners only). Tabs render inside.
+// The dashboard shell: 232px dark sidebar, sticky blurred topbar with
+// connection chips, account footer. Tabs render inside.
 const ShellContext = createContext(null);
 export const useShell = () => useContext(ShellContext);
 
@@ -21,85 +18,34 @@ const ICONS = {
       <path d="M9 2.5L14 5v6l-5 2.5L4 11V5l5-2.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
       <path d="M2 6.5v5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
-  ),
-  studio: (
-    <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
-      <path d="M8 1.5l1.6 4L14 7l-4.4 1.5L8 12.5 6.4 8.5 2 7l4.4-1.5L8 1.5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M12.8 11l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6.6-1.6z" fill="currentColor" />
-    </svg>
-  ),
-  crm: (
-    <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
-      <circle cx="5.5" cy="5.5" r="2.3" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M1.5 13c.5-2.4 2.1-3.6 4-3.6s3.5 1.2 4 3.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="11.5" cy="5" r="1.8" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M11 9.2c1.9 0 3.1 1 3.5 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  ),
-  automations: (
-    <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
-      <path d="M9 1.5L3 9h4l-1 5.5L12 7H8l1-5.5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-    </svg>
   )
 };
 
 const TABS = [
   { id: 'pulse', to: '/pulse.html', label: 'Pulse' },
-  { id: 'admanager', to: '/campaigns.html', label: 'Campaigns' },
-  { id: 'crm', href: 'https://login.leadly.sg', label: 'CRM', badge: '↗' },
-  { id: 'automations', to: '/automations.html', label: 'Automations', soon: true },
-  { id: 'studio', to: '/studio.html', label: 'Studio', soon: true }
+  { id: 'admanager', to: '/campaigns.html', label: 'Campaigns' }
 ];
 
-// Where each tab lives inside the demo - same components, /demo paths.
-const DEMO_TO = {
-  pulse: '/demo',
-  admanager: '/demo/campaigns',
-  automations: '/demo/automations',
-  studio: '/demo/studio'
-};
-
-function NavItems({ pathname, mobile, demo }) {
-  return TABS.map((t) => {
-    const to = demo && t.to ? DEMO_TO[t.id] || t.to : t.to;
-    const inner = (
-      <>
-        {ICONS[t.id]}
-        {t.label}
-        {t.soon && !mobile && <span className="nav-badge soon">SOON</span>}
-        {t.badge && !mobile && <span className="nav-badge">{t.badge}</span>}
-      </>
-    );
-    // CRM lives on its own domain - the nav item is a plain external link
-    if (t.href) {
-      return (
-        <a key={t.id} href={t.href} target="_blank" rel="noopener noreferrer" className="nav-item" role="tab" aria-selected={false}>
-          {inner}
-        </a>
-      );
-    }
-    return (
-      <Link
-        key={t.id}
-        to={to}
-        className={`nav-item${pathname === to ? ' active' : ''}`}
-        role="tab"
-        aria-selected={pathname === to}
-      >
-        {inner}
-      </Link>
-    );
-  });
+function NavItems({ pathname, mobile }) {
+  return TABS.map((t) => (
+    <Link
+      key={t.id}
+      to={t.to}
+      className={`nav-item${pathname === t.to ? ' active' : ''}`}
+      role="tab"
+      aria-selected={pathname === t.to}
+    >
+      {ICONS[t.id]}
+      {t.label}
+    </Link>
+  ));
 }
 
 export default function Shell({ title, children }) {
   const { pathname } = useLocation();
-  const isDemo = useDemo();
 
   const [status, setStatus] = useState(null);
   const [redirecting, setRedirecting] = useState(false);
-  const [ws, setWs] = useState(null); // { active, workspaces }
-  const [wsOpen, setWsOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState(null);
   const toastTimer = useRef(null);
 
@@ -123,24 +69,11 @@ export default function Shell({ title, children }) {
         setStatus(s);
       })
       .catch(() => {});
-    api
-      .workspacesList()
-      .then((w) => !cancelled && setWs(w))
-      .catch(() => {});
     return () => {
       cancelled = true;
       clearTimeout(toastTimer.current);
     };
   }, []);
-
-  // In demo the request adapter blocks every write and fires this event;
-  // showing the toast here covers callers that swallow errors silently.
-  useEffect(() => {
-    if (!isDemo) return undefined;
-    const onBlocked = () => toast(DEMO_MESSAGE);
-    window.addEventListener(DEMO_BLOCKED_EVENT, onBlocked);
-    return () => window.removeEventListener(DEMO_BLOCKED_EVENT, onBlocked);
-  }, [isDemo, toast]);
 
   if (redirecting) return null;
 
@@ -152,38 +85,10 @@ export default function Shell({ title, children }) {
     .join('')
     .slice(0, 2)
     .toUpperCase() || '·';
-  const role = ws?.active?.role || 'owner';
-  const workspaces = ws?.workspaces || [];
-  const isAdmin = !!status?.isPlatformAdmin;
-  const adminView = !!ws?.active?.adminView;
-  const showSwitcher = role === 'owner' && workspaces.length > 1;
-  const showAcctMenu = showSwitcher || isAdmin;
-
-  const exitAdminView = async () => {
-    try {
-      await api.adminExit();
-      window.location.href = '/admin.html';
-    } catch (err) {
-      toast(err.message);
-    }
-  };
-  // billing-exempt workspaces never see trial/paywall copy
-  const planLine = ws?.active?.billingExempt ? 'Pro · Agency' : 'Free plan';
-
-  const switchWorkspace = async (id) => {
-    if (id === ws?.active?.id) return setWsOpen(false);
-    try {
-      await api.workspaceSelect(id);
-      window.location.reload();
-    } catch (err) {
-      toast(err.message);
-    }
-  };
 
   const ctx = {
     status,
-    role,
-    workspace: ws?.active || null,
+    role: 'owner',
     toast
   };
 
@@ -203,77 +108,31 @@ export default function Shell({ title, children }) {
           </div>
           <nav className="nav" role="tablist" aria-label="Main navigation">
             <div className="nav-label">Workspace</div>
-            <NavItems pathname={pathname} demo={isDemo} />
+            <NavItems pathname={pathname} />
           </nav>
           <div className="sidebar-foot">
-            {showAcctMenu && wsOpen && (
-              <div className="ws-menu" role="menu">
-                {showSwitcher &&
-                  workspaces.map((w) => (
-                    <button key={w.id} type="button" className={`ws-item${w.id === ws.active.id ? ' on' : ''}`} onClick={() => switchWorkspace(w.id)}>
-                      <span className="dot" aria-hidden="true" />
-                      {w.name}
-                    </button>
-                  ))}
-                {isAdmin && (
-                  <button type="button" className="ws-item ws-admin" onClick={() => (window.location.href = '/admin.html')}>
-                    All workspaces →
-                  </button>
-                )}
-              </div>
-            )}
             <button
               type="button"
               className="acct"
-              onClick={() =>
-                // demo must never leave for the real settings page - a
-                // logged-in visitor would land on their own account there
-                isDemo ? toast(DEMO_MESSAGE) : showAcctMenu ? setWsOpen((v) => !v) : (window.location.href = '/settings.html')
-              }
-              title={isDemo ? 'Sample workspace' : showAcctMenu ? 'Workspaces' : 'Account settings'}
+              onClick={() => (window.location.href = '/settings.html')}
+              title="Account settings"
             >
               <div className="avatar">{initials}</div>
               <div>
-                <div className="acct-name">{ws?.active?.name || email || '…'}</div>
-                <div className="acct-plan">{planLine}</div>
+                <div className="acct-name">{email || '…'}</div>
+                <div className="acct-plan">Internal</div>
               </div>
             </button>
-            {!isDemo && (
-              <button type="button" className="ws-item" onClick={() => (window.location.href = '/settings.html')}>
-                Settings
-              </button>
-            )}
-            {isDemo ? (
-              <a className="ws-item" href="/login.html">
-                Exit demo
-              </a>
-            ) : (
-              <a className="ws-item" href="/.netlify/functions/logout">
-                Log out
-              </a>
-            )}
+            <button type="button" className="ws-item" onClick={() => (window.location.href = '/settings.html')}>
+              Settings
+            </button>
+            <a className="ws-item" href="/.netlify/functions/logout">
+              Log out
+            </a>
           </div>
         </aside>
 
         <div className="main">
-          {isDemo && (
-            <div className="demo-banner" role="status">
-              <span>You&rsquo;re viewing a demo with sample data</span>
-              <a className="sbtn sbtn-sm demo-banner-cta" href="/login.html">
-                Start your 7-day free trial
-              </a>
-            </div>
-          )}
-          {adminView && (
-            <div className="admin-banner" role="status">
-              <span>
-                Viewing <b>{ws?.active?.name}</b> workspace as Leadly
-              </span>
-              <button type="button" className="sbtn sbtn-sm admin-banner-exit" onClick={exitAdminView}>
-                Exit
-              </button>
-            </div>
-          )}
           <header className="topbar">
             <span className="page-title">{title}</span>
             <div className="conn-dots">
@@ -292,7 +151,7 @@ export default function Shell({ title, children }) {
             <div className="tab-pane">{children}</div>
           </main>
           <nav className="mobile-nav" aria-label="Main navigation">
-            <NavItems pathname={pathname} mobile demo={isDemo} />
+            <NavItems pathname={pathname} mobile />
           </nav>
         </div>
       </div>

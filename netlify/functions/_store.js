@@ -64,21 +64,6 @@ async function getWorkspaceFromRequest(headers, email) {
   const match = ((headers && headers.cookie) || '').match(/leadly_ws=([^;]+)/);
   const wanted = match ? decodeURIComponent(match[1]) : null;
 
-  // Platform admins may enter workspaces they aren't members of ("Enter
-  // workspace" from the admin directory). The cookie alone never grants
-  // this - the platform_admin row does; everyone else falls back to their
-  // own memberships below.
-  if (wanted && !memberships.some((m) => m.id === wanted)) {
-    try {
-      if (await backend.isPlatformAdmin(email)) {
-        const ws = await backend.getWorkspaceById(wanted);
-        if (ws) return { ...ws, role: 'agency', adminView: true, memberships };
-      }
-    } catch (err) {
-      console.error(`[store] admin workspace lookup failed: ${err.message}`);
-    }
-  }
-
   if (!memberships.length) {
     return { id: null, role: 'owner', name: 'Leadly (Agency)', billingExempt: false, memberships: [] };
   }
@@ -129,45 +114,13 @@ module.exports = {
   getAiInsightCache: backend.getAiInsightCache,
   saveAiInsightCache: backend.saveAiInsightCache,
   clearAiInsightCache: backend.clearAiInsightCache,
-  createChangeLog: backend.createChangeLog,
-  listChangeLog: backend.listChangeLog,
+  // studio_records doubles as a small per-user KV cache (pulse-chips uses it)
   getStudioRecord: backend.getStudioRecord,
   putStudioRecord: backend.putStudioRecord,
-  listStudioRecords: backend.listStudioRecords,
-  listAlertRules: backend.listAlertRules,
-  createAlertRule: backend.createAlertRule,
-  updateAlertRule: backend.updateAlertRule,
-  deleteAlertRule: backend.deleteAlertRule,
   listMemberships: backend.listMemberships,
   getMetricsConfig: backend.getMetricsConfig,
   saveMetricsConfig: backend.saveMetricsConfig,
   workspaceOwnerEmail: backend.workspaceOwnerEmail,
-  isPlatformAdmin: backend.isPlatformAdmin,
-  getPlatformSetting: backend.getPlatformSetting,
-  savePlatformSetting: backend.savePlatformSetting,
-  getWorkspaceStudio: backend.getWorkspaceStudio,
-  setWorkspaceStudio: backend.setWorkspaceStudio,
-  addStudioSpend: backend.addStudioSpend,
-  getMonthSpend: backend.getMonthSpend,
-  getMonthSpendAll: backend.getMonthSpendAll,
-  createStudioJob: backend.createStudioJob,
-  getStudioJobById: backend.getStudioJobById,
-  updateStudioJob: backend.updateStudioJob,
-  listStudioJobs: backend.listStudioJobs,
-  getWorkspaceById: backend.getWorkspaceById,
-  listAllWorkspaces: backend.listAllWorkspaces,
-  createWorkspace: backend.createWorkspace,
-  createAdminSession: backend.createAdminSession,
-  endAdminSessions: backend.endAdminSessions,
-  writeAudit: backend.writeAudit,
-  listWorkspaceMembers: backend.listWorkspaceMembers,
-  addWorkspaceMember: backend.addWorkspaceMember,
-  removeWorkspaceMember: backend.removeWorkspaceMember,
-  getWorkspaceInvite: backend.getWorkspaceInvite,
-  createWorkspaceInvite: backend.createWorkspaceInvite,
-  acceptWorkspaceInvite: backend.acceptWorkspaceInvite,
-  createChangeRequest: backend.createChangeRequest,
-  listChangeRequests: backend.listChangeRequests,
   getWorkspaceFromRequest,
   ensureWorkspace,
   getDataUser,

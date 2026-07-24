@@ -1,8 +1,7 @@
 // One validated, guardrailed, audited write: pause/enable, budget, or bid.
 // POST { channel, entityType, entityId, action, value, acknowledged }.
-const { getEmailFromRequest, getWorkspaceFromRequest, getDataUser, createChangeLog } = require('./_store');
+const { getEmailFromRequest, getWorkspaceFromRequest, getDataUser } = require('./_store');
 const { executeWrite } = require('./_manage');
-const { demoGuard } = require('./_demoGuard');
 
 const json = (statusCode, body) => ({
   statusCode,
@@ -32,8 +31,6 @@ function validate(input) {
 }
 
 exports.handler = async (event) => {
-  const demoBlocked = demoGuard(event);
-  if (demoBlocked) return demoBlocked;
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
   const email = getEmailFromRequest(event.headers);
   if (!email) return json(401, { error: 'Not logged in.' });
@@ -61,26 +58,10 @@ exports.handler = async (event) => {
     const result = await executeWrite(user, input);
     if (result.needsAck) return json(200, { needsAck: true, ...result });
 
-    // The write happened - now record it. An audit failure never unwinds
-    // the change, but it is loud and reported.
-    let auditFailed = false;
-    try {
-      await createChangeLog(email, {
-        channel: input.channel,
-        accountId: user.accounts[input.channel].selectedAdAccountId,
-        entityType: input.entityType,
-        entityId: input.entityId,
-        entityName: result.entityName,
-        action: input.action,
-        oldValue: result.oldValue,
-        newValue: result.newValue,
-        apiResult: result.apiResult
-      });
-    } catch (err) {
-      auditFailed = true;
-      console.error(`[manage-entity] AUDIT LOG FAILED (change WAS applied): ${err.message}`);
-    }
-    return json(200, { ok: true, ...result, auditFailed });
+    // The write happened - note it in the function log (the audit-log
+    // feature was removed in the internal build).
+    console.log(`[manage-entity] ${email} ${input.channel} ${input.action} ${input.entityType} ${input.entityId} -> ${JSON.stringify(result.newValue)}`);
+    return json(200, { ok: true, ...result });
   } catch (err) {
     console.error(`[manage-entity] ${input.channel} ${input.action} ${input.entityId} failed: ${err.message}`);
     const status = err.forbidden ? 403 : err.readOnly ? 409 : 502;

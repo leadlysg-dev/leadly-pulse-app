@@ -16,22 +16,7 @@ class ApiError extends Error {
   }
 }
 
-// On /demo routes every call is answered locally by the demo adapter
-// (reads from fixtures, writes blocked, pulse-chat passed through flagged
-// as demo). The adapter is imported on demand, so authenticated sessions
-// never download the demo code and their requests go straight to fetch.
-const onDemoRoute = () =>
-  typeof window !== 'undefined' && /^\/demo(\/|$)/.test(window.location.pathname);
-
 async function request(path, options = {}) {
-  if (onDemoRoute()) {
-    const { demoRequest } = await import('../demo/adapter');
-    return demoRequest(path, options, networkRequest);
-  }
-  return networkRequest(path, options);
-}
-
-async function networkRequest(path, options = {}) {
   let res;
   try {
     res = await fetch(path, options);
@@ -65,16 +50,7 @@ async function networkRequest(path, options = {}) {
 export const api = {
   getStatus: () => request('/.netlify/functions/get-status'),
 
-  getDashboardData: (view, channel = 'all') =>
-    request(
-      `/.netlify/functions/get-dashboard-data?${viewQuery(view)}&channel=${encodeURIComponent(channel)}`
-    ),
-
-  getHistory: () => request('/.netlify/functions/get-history'),
-
   getReport: (view) => request(`/.netlify/functions/get-report?${viewQuery(view)}`),
-
-  getAds: (view) => request(`/.netlify/functions/get-ads?${viewQuery(view)}`),
 
   getManageTree: (view, channel) =>
     request(`/.netlify/functions/get-manage-tree?${viewQuery(view)}&channel=${encodeURIComponent(channel)}`),
@@ -84,8 +60,6 @@ export const api = {
 
   manageBulk: (payload) =>
     request('/.netlify/functions/manage-bulk', { method: 'POST', body: JSON.stringify(payload) }),
-
-  getAuditLog: () => request('/.netlify/functions/get-audit-log'),
 
   listAccounts: () => request('/.netlify/functions/list-accounts'),
 
@@ -127,36 +101,10 @@ export const api = {
       `/.netlify/functions/get-ai-insights?range=${encodeURIComponent(range)}${refresh ? '&refresh=1' : ''}${check ? '&check=1' : ''}`
     ),
 
-  createAlert: (rule) =>
-    request('/.netlify/functions/create-alert', {
-      method: 'POST',
-      body: JSON.stringify(rule)
-    }),
-
   disconnectProvider: (provider) =>
     request('/.netlify/functions/disconnect-provider', {
       method: 'POST',
       body: JSON.stringify({ provider })
-    }),
-
-  getGbp: (view) => request(`/.netlify/functions/get-gbp?${viewQuery(view)}`),
-
-  selectGbpLocation: (locationId) =>
-    request('/.netlify/functions/select-gbp-location', {
-      method: 'POST',
-      body: JSON.stringify({ locationId })
-    }),
-
-  replyReview: (reviewId, comment) =>
-    request('/.netlify/functions/reply-review', {
-      method: 'POST',
-      body: JSON.stringify({ reviewId, comment })
-    }),
-
-  assistantChat: (messages) =>
-    request('/.netlify/functions/assistant-chat', {
-      method: 'POST',
-      body: JSON.stringify({ messages })
     }),
 
   metricsConfig: () => request('/.netlify/functions/metrics-config'),
@@ -170,109 +118,8 @@ export const api = {
   pulseChat: (payload) =>
     request('/.netlify/functions/pulse-chat', { method: 'POST', body: JSON.stringify(payload) }),
 
-  pulseChips: () => request('/.netlify/functions/pulse-chips'),
+  pulseChips: () => request('/.netlify/functions/pulse-chips')
 
-  automationSettings: () => request('/.netlify/functions/automation-settings'),
-
-  automationSettingsSave: (module, enabled) =>
-    request('/.netlify/functions/automation-settings', {
-      method: 'POST',
-      body: JSON.stringify({ module, enabled })
-    }),
-
-  workspacesList: () => request('/.netlify/functions/workspaces-list'),
-
-  workspaceSelect: (workspaceId) =>
-    request('/.netlify/functions/workspace-select', {
-      method: 'POST',
-      body: JSON.stringify({ workspaceId })
-    }),
-
-  inviteCreate: (workspaceId, role = 'client') =>
-    request('/.netlify/functions/invite-create', {
-      method: 'POST',
-      body: JSON.stringify({ workspaceId, role })
-    }),
-
-  inviteInfo: (token) => request(`/.netlify/functions/invite-info?token=${encodeURIComponent(token)}`),
-
-  inviteAccept: (token, email, password) =>
-    request('/.netlify/functions/invite-accept', {
-      method: 'POST',
-      body: JSON.stringify({ token, email, password })
-    }),
-
-  adminWorkspaces: () => request('/.netlify/functions/admin-workspaces'),
-
-  adminWorkspaceCreate: (name, managed) =>
-    request('/.netlify/functions/admin-workspace-create', {
-      method: 'POST',
-      body: JSON.stringify({ name, managed })
-    }),
-
-  adminEnter: (workspaceId) =>
-    request('/.netlify/functions/admin-enter', { method: 'POST', body: JSON.stringify({ workspaceId }) }),
-
-  adminExit: () => request('/.netlify/functions/admin-exit', { method: 'POST', body: '{}' }),
-
-  workspaceMembers: () => request('/.netlify/functions/workspace-members'),
-
-  workspaceMemberAdd: (email, role = 'agency') =>
-    request('/.netlify/functions/workspace-members', {
-      method: 'POST',
-      body: JSON.stringify({ action: 'add', email, role })
-    }),
-
-  workspaceMemberRemove: (email) =>
-    request('/.netlify/functions/workspace-members', {
-      method: 'POST',
-      body: JSON.stringify({ action: 'remove', email })
-    }),
-
-  changeRequestCreate: (payload) =>
-    request('/.netlify/functions/change-request', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    }),
-
-  changeRequestList: () => request('/.netlify/functions/change-request'),
-
-  studioConfig: () => request('/.netlify/functions/studio-config'),
-
-  studioGenerate: (payload) =>
-    request('/.netlify/functions/studio-generate', { method: 'POST', body: JSON.stringify(payload) }),
-
-  studioJob: (id) => request(`/.netlify/functions/studio-job?id=${encodeURIComponent(id)}`),
-
-  studioGallery: () => request('/.netlify/functions/studio-gallery'),
-
-  studioAsset: (payload) =>
-    request('/.netlify/functions/studio-asset', { method: 'POST', body: JSON.stringify(payload) }),
-
-  adminStudioKeys: () => request('/.netlify/functions/admin-studio-keys'),
-
-  adminStudioKeysSave: (keys) =>
-    request('/.netlify/functions/admin-studio-keys', { method: 'POST', body: JSON.stringify({ keys }) }),
-
-  adminStudioWorkspace: (workspaceId, patch) =>
-    request('/.netlify/functions/admin-studio-workspace', {
-      method: 'POST',
-      body: JSON.stringify({ workspaceId, ...patch })
-    }),
-
-  listAlerts: () => request('/.netlify/functions/list-alerts'),
-
-  updateAlert: (id, enabled) =>
-    request('/.netlify/functions/update-alert', {
-      method: 'POST',
-      body: JSON.stringify({ id, enabled })
-    }),
-
-  deleteAlert: (id) =>
-    request('/.netlify/functions/delete-alert', {
-      method: 'POST',
-      body: JSON.stringify({ id })
-    })
 };
 
 export { ApiError };

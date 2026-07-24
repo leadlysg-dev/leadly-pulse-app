@@ -4,18 +4,11 @@ import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-route
 import './styles/global.css';
 import { api } from './lib/api';
 import Login from './pages/Login';
-import Invite from './pages/Invite';
 import Shell from './components/Shell';
-import DemoPage from './demo/DemoPage';
 import PulseTab from './pages/app/PulseTab';
 import CampaignsTab from './pages/app/CampaignsTab';
-import StudioTab from './pages/app/StudioTab';
-import AutomationsTab from './pages/app/AutomationsTab';
-import AdminTab from './pages/app/AdminTab';
 import Settings from './pages/Settings';
-import Seo from './pages/Seo';
 import SelectAccount from './pages/SelectAccount';
-import Upgrade from './pages/Upgrade';
 
 // "/" (and any unknown path) routes into the app: logged-in visitors go to
 // Pulse, everyone else to login. Client-side Navigate, not a full page
@@ -40,7 +33,7 @@ function RootRedirect() {
   return to ? <Navigate to={to} replace /> : null;
 }
 
-// Old tab URLs forward to their homes in the five-tab dashboard, keeping the
+// Old tab URLs forward to their homes in the dashboard, keeping the
 // query string - the backend (login, OAuth callbacks) still redirects to
 // /dashboard.html and must keep working without backend changes.
 function LegacyRedirect({ to }) {
@@ -55,27 +48,10 @@ const tab = (title, node) => <Shell title={title}>{node}</Shell>;
 // must never break; the clean forms are what people actually type.
 const PAGES = [
   ['login', <Login />],
-  ['invite', <Invite />],
   ['pulse', tab('Pulse', <PulseTab />)],
   ['campaigns', tab('Campaigns', <CampaignsTab />)],
-  ['studio', tab('Studio', <StudioTab />)],
-  ['automations', tab('Automations', <AutomationsTab />)],
-  ['admin', tab('All workspaces', <AdminTab />)],
   ['settings', tab('Settings', <Settings />)],
-  ['seo', tab('Local SEO', <Seo />)],
-  ['select-account', <SelectAccount />],
-  ['upgrade', tab('Upgrade', <Upgrade />)]
-];
-
-// The no-auth demo: the same tab components under /demo, wrapped in
-// DemoPage so the request layer serves fixture data instead of the API.
-// No JWT, no session, no database - the auth guard never runs because
-// get-status itself is answered locally.
-const DEMO_PAGES = [
-  ['', 'Pulse', <PulseTab />],
-  ['campaigns', 'Campaigns', <CampaignsTab />],
-  ['automations', 'Automations', <AutomationsTab />],
-  ['studio', 'Studio', <StudioTab />]
+  ['select-account', <SelectAccount />]
 ];
 
 const LEGACY = [
@@ -102,14 +78,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route key={`${name}.html`} path={`/${name}.html`} element={<LegacyRedirect to={to} />} />,
           <Route key={name} path={`/${name}`} element={<LegacyRedirect to={to} />} />
         ])}
-        {DEMO_PAGES.map(([sub, title, node]) => (
-          <Route
-            key={`demo-${sub || 'pulse'}`}
-            path={sub ? `/demo/${sub}` : '/demo'}
-            element={<DemoPage title={title}>{node}</DemoPage>}
-          />
-        ))}
-        <Route path="/demo/*" element={<Navigate to="/demo" replace />} />
         {/* Anything unknown lands where "/" does - never a blank page. */}
         <Route path="*" element={<RootRedirect />} />
       </Routes>

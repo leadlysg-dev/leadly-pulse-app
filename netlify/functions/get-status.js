@@ -1,4 +1,4 @@
-const { getEmailFromRequest, getUser, hasSetPassword, isPlatformAdmin } = require('./_store');
+const { getEmailFromRequest, getUser, hasSetPassword } = require('./_store');
 
 // Friendly name of the selected ad account on a connection, for Settings.
 function selectedAccountName(conn) {
@@ -27,7 +27,6 @@ exports.handler = async (event) => {
     body: JSON.stringify({
       loggedIn: true,
       email: user.email,
-      isPlatformAdmin: await isPlatformAdmin(user.email).catch(() => false),
       metaConnected: !!meta,
       metaNeedsPick: !!meta && meta.adAccounts.length > 1 && !meta.selectedAdAccountId,
       metaAccountName: selectedAccountName(meta),
@@ -35,7 +34,7 @@ exports.handler = async (event) => {
       googleNeedsPick: !!google && google.adAccounts.length > 1 && !google.selectedAdAccountId,
       googleAccountName: selectedAccountName(google),
       // Primary tracked metric per platform (kept in sync with the master
-      // metrics config), for metric-aware alert presets.
+      // metrics config).
       metaPrimaryMetric: (meta && meta.selectedMetrics && meta.selectedMetrics[0]) || { id: 'lead', label: 'Leads' },
       googlePrimaryMetric: (google && google.selectedMetrics && google.selectedMetrics[0]) || null,
       // For the Settings page: "Change password" vs "Set password".

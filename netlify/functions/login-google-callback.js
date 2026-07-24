@@ -13,7 +13,9 @@
 // is public).
 const fetch = require('node-fetch');
 const jwt = require('jsonwebtoken');
-const { getUser, createSessionCookie, workspaceCookie, acceptWorkspaceInvite } = require('./_store');
+const crypto = require('crypto');
+const { getUser, createUser, createSessionCookie } = require('./_store');
+const { emailAllowed } = require('./_allowlist');
 const { loginRedirectUri } = require('./login-google');
 
 // Friendly failures land back on the login page with a readable message
@@ -42,12 +44,10 @@ exports.handler = async (event) => {
   }
 
   let next = null;
-  let inviteToken = null;
   try {
     const state = jwt.verify(qs.state, process.env.SESSION_SECRET);
     if (state.purpose !== 'google-login') throw new Error('wrong purpose');
     next = state.next || null;
-    inviteToken = state.invite || null;
   } catch (err) {
     // forged, expired, or reused state - or a SESSION_SECRET mismatch
     console.error(`[login-google-callback] state verification failed: ${err.name}: ${err.message}`);
@@ -94,36 +94,16 @@ exports.handler = async (event) => {
       return backToLogin('google-unverified');
     }
 
-    // A state-borne invite token claims the invite for this verified email:
-    // creates the account if needed (no password - Google is the identity)
-    // and attaches the membership with the invite's role. Owners land on
-    // the connect-accounts screen; everyone else on Pulse.
-    if (inviteToken) {
-      try {
-        const { workspaceId, role } = await acceptWorkspaceInvite(inviteToken, email, null, { viaGoogle: true });
-        return {
-          statusCode: 302,
-          headers: { Location: role === 'owner' ? '/settings.html?welcome=1' : '/pulse.html' },
-          multiValueHeaders: { 'Set-Cookie': [createSessionCookie(email), workspaceCookie(workspaceId)] },
-          body: ''
-        };
-      } catch (err) {
-        console.error(`[login-google-callback] invite claim failed: ${err.message}`);
-        return {
-          statusCode: 302,
-          headers: { Location: `/invite.html?token=${encodeURIComponent(inviteToken)}&error=google` },
-          body: ''
-        };
-      }
-    }
-
     let user = await getUser(email);
     if (!user) {
-      // Invite-only: Google sign-in authenticates existing accounts but must
-      // not mint new ones, or it would be a public-signup backdoor. New
-      // people come in through a workspace invite link.
-      console.error(`[login-google-callback] no account for a verified Google email - invite required`);
-      return backToLogin('google-no-account');
+      // Internal tool: a verified Google email on the allowed list may mint
+      // its own account (no password - Google is the identity). Anyone else
+      // is turned away.
+      if (!emailAllowed(email)) {
+        console.error(`[login-google-callback] verified Google email not on ALLOWED_LOGIN_EMAILS`);
+        return backToLogin('google-no-account');
+      }
+      user = await createUser(email, crypto.randomBytes(32).toString('hex'), { passwordSet: false });
     }
 
     const destination =

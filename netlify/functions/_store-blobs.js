@@ -76,17 +76,6 @@ async function saveAiInsightCache(email, range, entry) {
   });
 }
 
-async function createChangeLog(email, entry) {
-  await withUser(email, (user) => {
-    user.changeLog = [{ ...entry, createdAt: new Date().toISOString() }, ...(user.changeLog || [])].slice(0, 200);
-  });
-}
-
-async function listChangeLog(email, limit = 100) {
-  const user = await getUser(email);
-  return ((user && user.changeLog) || []).slice(0, limit);
-}
-
 async function clearAiInsightCache(email) {
   await withUser(email, (user) => {
     delete user.aiInsightCache;
@@ -117,19 +106,6 @@ async function putStudioRecord(email, kind, id, record) {
   await studioStore().setJSON(studioKey(email, kind, id), record);
 }
 
-async function listStudioRecords(email, kind, opts = {}) {
-  const store = studioStore();
-  const prefix = `${email.toLowerCase()}/${kind}/${opts.idPrefix || ''}`;
-  const { blobs } = await store.list({ prefix });
-  const keys = (blobs || [])
-    .map((b) => b.key)
-    .sort()
-    .reverse()
-    .slice(0, opts.limit || 100);
-  const records = await Promise.all(keys.map((k) => store.get(k, { type: 'json' })));
-  return records.filter(Boolean);
-}
-
 // --- Workspaces: the Blobs fallback is single-tenant ---
 // Every user is the owner of one implicit agency workspace; invites and
 // client roles need the relational backend.
@@ -142,67 +118,15 @@ async function workspaceOwnerEmail() {
   return null; // single-tenant: the caller falls back to the session user
 }
 
-async function createWorkspaceInvite() {
-  throw new Error('Workspaces and invites require the Supabase backend (unset STORAGE_BACKEND=blobs).');
-}
-
-// Platform admin needs the relational backend.
-async function isPlatformAdmin() {
-  return false;
-}
 const needsSupabase = () => {
   throw new Error('Studio requires the Supabase backend (unset STORAGE_BACKEND=blobs).');
 };
-async function getPlatformSetting() { return null; }
-async function savePlatformSetting() { needsSupabase(); }
-async function getWorkspaceStudio() { return { enabled: false, budget: 0, brandKit: null }; }
-async function setWorkspaceStudio() { needsSupabase(); }
-async function addStudioSpend() { needsSupabase(); }
-async function getMonthSpend() { return 0; }
-async function getMonthSpendAll() { return {}; }
-async function createStudioJob() { needsSupabase(); }
-async function getStudioJobById() { return null; }
-async function updateStudioJob() { needsSupabase(); }
-async function listStudioJobs() { return []; }
-async function getWorkspaceById() {
-  return null;
-}
-async function listAllWorkspaces() {
-  throw new Error('The admin directory requires the Supabase backend (unset STORAGE_BACKEND=blobs).');
-}
 async function createWorkspace() {
   throw new Error('Creating workspaces requires the Supabase backend (unset STORAGE_BACKEND=blobs).');
-}
-async function createAdminSession() {
-  throw new Error('Admin sessions require the Supabase backend (unset STORAGE_BACKEND=blobs).');
-}
-async function endAdminSessions() {}
-async function writeAudit() {}
-async function listWorkspaceMembers() {
-  return [];
 }
 async function addWorkspaceMember() {
   throw new Error('Members require the Supabase backend (unset STORAGE_BACKEND=blobs).');
 }
-async function removeWorkspaceMember() {
-  throw new Error('Members require the Supabase backend (unset STORAGE_BACKEND=blobs).');
-}
-async function getWorkspaceInvite() {
-  return null;
-}
-
-async function acceptWorkspaceInvite() {
-  throw new Error('Workspaces and invites require the Supabase backend (unset STORAGE_BACKEND=blobs).');
-}
-
-async function createChangeRequest() {
-  throw new Error('Change requests require the Supabase backend (unset STORAGE_BACKEND=blobs).');
-}
-
-async function listChangeRequests() {
-  return [];
-}
-
 let blobMetricsConfig = null;
 async function getMetricsConfig() {
   return blobMetricsConfig;
@@ -223,39 +147,6 @@ async function withUser(email, mutate) {
   return result;
 }
 
-async function listAlertRules(email) {
-  const store = usersStore();
-  const user = await store.get(email.toLowerCase(), { type: 'json' });
-  return (user && user.alertRules) || [];
-}
-
-async function createAlertRule(email, rule) {
-  const { randomUUID } = require('crypto');
-  const saved = {
-    id: randomUUID(),
-    ...rule,
-    enabled: true,
-    createdAt: new Date().toISOString()
-  };
-  await withUser(email, (user) => {
-    user.alertRules = [saved, ...(user.alertRules || [])];
-  });
-  return saved;
-}
-
-async function updateAlertRule(email, ruleId, enabled) {
-  await withUser(email, (user) => {
-    const rule = (user.alertRules || []).find((r) => r.id === ruleId);
-    if (rule) rule.enabled = enabled;
-  });
-}
-
-async function deleteAlertRule(email, ruleId) {
-  await withUser(email, (user) => {
-    user.alertRules = (user.alertRules || []).filter((r) => r.id !== ruleId);
-  });
-}
-
 module.exports = {
   getUser,
   createUser,
@@ -265,43 +156,12 @@ module.exports = {
   getAiInsightCache,
   saveAiInsightCache,
   clearAiInsightCache,
-  createChangeLog,
-  listChangeLog,
   getStudioRecord,
   putStudioRecord,
-  listStudioRecords,
   listMemberships,
   getMetricsConfig,
   saveMetricsConfig,
   workspaceOwnerEmail,
-  isPlatformAdmin,
-  getPlatformSetting,
-  savePlatformSetting,
-  getWorkspaceStudio,
-  setWorkspaceStudio,
-  addStudioSpend,
-  getMonthSpend,
-  getMonthSpendAll,
-  createStudioJob,
-  getStudioJobById,
-  updateStudioJob,
-  listStudioJobs,
-  getWorkspaceById,
-  listAllWorkspaces,
   createWorkspace,
-  createAdminSession,
-  endAdminSessions,
-  writeAudit,
-  listWorkspaceMembers,
-  addWorkspaceMember,
-  removeWorkspaceMember,
-  getWorkspaceInvite,
-  createWorkspaceInvite,
-  acceptWorkspaceInvite,
-  createChangeRequest,
-  listChangeRequests,
-  listAlertRules,
-  createAlertRule,
-  updateAlertRule,
-  deleteAlertRule
+  addWorkspaceMember
 };

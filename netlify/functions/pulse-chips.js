@@ -7,14 +7,14 @@ const { getEmailFromRequest, getUser, getStudioRecord, putStudioRecord, getWorks
 const { parseJson } = require('./_json');
 
 const MODEL = 'claude-haiku-4-5';
-const MOCK = process.env.STUDIO_MOCK === '1';
+const MOCK = process.env.AI_MOCK === '1';
 const COLORS = ['c-green', 'c-cobalt', 'c-purple', 'c-amber'];
 
 const DEFAULTS = [
   { key: 'today', color: 'c-green', label: 'How did my ads do today?' },
   { key: 'cpl', color: 'c-cobalt', label: 'What’s my cost per lead?' },
   { key: 'best', color: 'c-purple', label: 'Which ad is doing best?' },
-  { key: 'alert', color: 'c-amber', label: 'Warn me if something goes wrong' }
+  { key: 'spend', color: 'c-amber', label: 'Where is the budget going?' }
 ];
 
 const json = (body) => ({ statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -59,7 +59,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 400,
-        system: `You write four short suggested questions for a small-business owner's ad dashboard, based on today's data. Same reading level as these examples: "How did my ads do today?", "Which ad is doing best?", "Warn me if something goes wrong". No jargon - this client calls their results "${resultName}", so use that word, never "leads/conversions". Each question under 8 words. Make them specific to anything interesting in the data (a rising cost, a winning ad, an idle campaign). The LAST one must always be about setting up a warning/alert. Return ONLY JSON: {"chips":[{"label":"..."},{"label":"..."},{"label":"..."},{"label":"..."}]}`,
+        system: `You write four short suggested questions for a small-business owner's ad dashboard, based on today's data. Same reading level as these examples: "How did my ads do today?", "Which ad is doing best?", "Where is the budget going?". No jargon - this client calls their results "${resultName}", so use that word, never "leads/conversions". Each question under 8 words. Make them specific to anything interesting in the data (a rising cost, a winning ad, an idle campaign). Return ONLY JSON: {"chips":[{"label":"..."},{"label":"..."},{"label":"..."},{"label":"..."}]}`,
         messages: [{ role: 'user', content: `TODAY'S DATA:\n${JSON.stringify(snapshot).slice(0, 10000)}` }]
       })
     });
@@ -69,7 +69,7 @@ exports.handler = async (event) => {
     const labels = (out.chips || []).map((c) => String(c.label || '').trim()).filter(Boolean);
     if (labels.length !== 4) throw new Error('bad chip count');
     const chips = labels.map((label, i) => ({
-      key: i === 3 ? 'alert' : null,
+      key: null,
       color: COLORS[i],
       label
     }));

@@ -2,9 +2,8 @@
 // rate limits stay comfortable, with a per-entity result list. POST
 // { channel, entityType, action, value|percent, entities: [{id, name}],
 //   acknowledged }.
-const { getEmailFromRequest, getWorkspaceFromRequest, getDataUser, createChangeLog } = require('./_store');
+const { getEmailFromRequest, getWorkspaceFromRequest, getDataUser } = require('./_store');
 const { executeWrite } = require('./_manage');
-const { demoGuard } = require('./_demoGuard');
 
 const json = (statusCode, body) => ({
   statusCode,
@@ -15,8 +14,6 @@ const json = (statusCode, body) => ({
 const MAX_BULK = 25;
 
 exports.handler = async (event) => {
-  const demoBlocked = demoGuard(event);
-  if (demoBlocked) return demoBlocked;
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
   const email = getEmailFromRequest(event.headers);
   if (!email) return json(401, { error: 'Not logged in.' });
@@ -69,21 +66,7 @@ exports.handler = async (event) => {
         results.push({ id: entity.id, needsAck: true, reason: result.reason, oldValue: result.oldValue, newValue: result.newValue });
         continue;
       }
-      try {
-        await createChangeLog(email, {
-          channel: input.channel,
-          accountId: user.accounts[input.channel].selectedAdAccountId,
-          entityType: input.entityType,
-          entityId: String(entity.id),
-          entityName: result.entityName,
-          action: input.action,
-          oldValue: result.oldValue,
-          newValue: result.newValue,
-          apiResult: result.apiResult
-        });
-      } catch (err) {
-        console.error(`[manage-bulk] AUDIT LOG FAILED (change WAS applied): ${err.message}`);
-      }
+      console.log(`[manage-bulk] ${email} ${input.channel} ${input.action} ${input.entityType} ${entity.id} -> ${JSON.stringify(result.newValue)}`);
       results.push({ id: entity.id, ok: true, entityName: result.entityName, oldValue: result.oldValue, newValue: result.newValue });
     } catch (err) {
       results.push({ id: entity.id, error: err.message });

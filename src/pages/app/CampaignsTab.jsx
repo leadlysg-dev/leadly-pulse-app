@@ -7,7 +7,7 @@ import TableScroll from '../../components/TableScroll';
 import { masterColumns, nodeValue, formatCol } from '../../lib/metrics';
 
 const money = (v) => 'S$' + (v || 0).toLocaleString('en-SG', { maximumFractionDigits: v >= 100 ? 0 : 2 });
-const LOCK_TIP = 'Managed by Leadly — ask Pulse to request a change';
+const LOCK_TIP = 'This account is read-only here';
 const THUMBS = ['t1', 't2', 't3', 't4', 't5', 't6'];
 
 function Switch({ on, locked, busy, label, onToggle }) {
@@ -55,8 +55,8 @@ function BudgetCell({ node, locked, busy, onBudget }) {
 // inline budgets, on/off switches, bulk pause. Nothing blends here; anything
 // creative or structural happens on the native platforms.
 export default function CampaignsTab() {
-  const { status, role, toast } = useShell();
-  const locked = role === 'client';
+  const { status, toast } = useShell();
+  const locked = false;
   const email = status?.email || '';
 
   const [range, setRange] = useState({ key: 'last_7d', label: 'Last 7 days' });
@@ -231,12 +231,6 @@ export default function CampaignsTab() {
   // "New campaign" opens the CURRENT view's native creator, deep-linked to
   // the workspace's ad account for that platform.
   const createNew = () => {
-    if (locked) {
-      api.changeRequestCreate({ request: `Please create a new ${platform === 'meta' ? 'Meta' : 'Google'} campaign for us.` })
-        .then(() => toast('Sent to Leadly — they’ll set it up with you.'))
-        .catch((err) => toast(err.message));
-      return;
-    }
     const acct = accounts?.[platform];
     const url =
       platform === 'meta'
@@ -390,7 +384,7 @@ export default function CampaignsTab() {
                     <td />
                     <td className="pin" colSpan={4 + cols.length}>
                       <span className="section-sub">
-                        {trees?.[platform]?.state === 'ok' ? 'No campaigns match this view.' : `${platform === 'meta' ? 'Meta' : 'Google'} isn’t connected for this workspace yet.`}
+                        {trees?.[platform]?.state === 'ok' ? 'No campaigns match this view.' : `${platform === 'meta' ? 'Meta' : 'Google'} isn’t connected yet.`}
                       </span>
                     </td>
                   </tr>
@@ -400,12 +394,6 @@ export default function CampaignsTab() {
             </table>
           </TableScroll>
         </div>
-      )}
-      {locked && (
-        <p className="section-sub" style={{ marginTop: 10 }}>
-          Your campaigns are managed by Leadly. Ask Pulse (on the Pulse tab) to request any change — budgets, pausing,
-          new ads — and the team is notified instantly.
-        </p>
       )}
     </>
   );
