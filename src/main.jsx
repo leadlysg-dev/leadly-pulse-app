@@ -7,7 +7,6 @@ import Login from './pages/Login';
 import Shell from './components/Shell';
 import DemoPage from './demo/DemoPage';
 import PulseTab from './pages/app/PulseTab';
-import CampaignsTab from './pages/app/CampaignsTab';
 import Settings from './pages/Settings';
 import SelectAccount from './pages/SelectAccount';
 
@@ -50,7 +49,6 @@ const tab = (title, node) => <Shell title={title}>{node}</Shell>;
 const PAGES = [
   ['login', <Login />],
   ['pulse', tab('Pulse', <PulseTab />)],
-  ['campaigns', tab('Campaigns', <CampaignsTab />)],
   ['settings', tab('Settings', <Settings />)],
   ['select-account', <SelectAccount />]
 ];
@@ -59,18 +57,16 @@ const PAGES = [
 // DemoPage so the request layer serves fixture data instead of the API.
 // No JWT, no session, no database - the auth guard never runs because
 // get-status itself is answered locally.
-const DEMO_PAGES = [
-  ['', 'Pulse', <PulseTab />],
-  ['campaigns', 'Campaigns', <CampaignsTab />]
-];
+const DEMO_PAGES = [['', 'Pulse', <PulseTab />]];
 
 const LEGACY = [
   ['dashboard', '/pulse.html'],
   ['reports', '/pulse.html'],
   ['reporting', '/pulse.html'],
   ['assistant', '/pulse.html'],
-  ['manage', '/campaigns.html'],
-  ['admanager', '/campaigns.html'],
+  ['manage', '/pulse.html'],
+  ['admanager', '/pulse.html'],
+  ['campaigns', '/pulse.html'],
   ['crm', '/pulse.html'],
   ['creative', '/pulse.html']
 ];

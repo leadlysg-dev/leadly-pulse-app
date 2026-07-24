@@ -41,8 +41,8 @@ export default function SelectAccount() {
     setSaving(true);
     try {
       await api.selectAccount(provider, selectedId);
-      // Pulse and Campaigns read the selection live, so both re-sync to the
-      // new account on their next load. Conversions live in the master
+      // Pulse reads the selection live, so it re-syncs to the
+      // new account on its next load. Conversions live in the master
       // metrics setup (Settings), not per platform.
       window.location.href = '/settings.html';
     } catch (err) {

@@ -255,8 +255,8 @@ export default function Settings() {
                     <span className="settings-row-label">What Pulse tracks</span>
                     <span className="settings-hint">
                       {metricsConfig
-                        ? `Your headline result is “${metricsConfig.primaryResult?.name || 'Enquiries'}”. Re-run the setup to change the metrics and results shown across Pulse and Campaigns.`
-                        : 'Run the setup to choose the metrics and results shown across Pulse and Campaigns.'}
+                        ? `Your headline result is “${metricsConfig.primaryResult?.name || 'Enquiries'}”. Re-run the setup to change the metrics and results shown on Pulse.`
+                        : 'Run the setup to choose the metrics and results shown on Pulse.'}
                     </span>
                   </div>
                   <button type="button" className="btn btn-secondary" onClick={() => setMetricsSetup(true)}>

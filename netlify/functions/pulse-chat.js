@@ -25,20 +25,17 @@ const MOCK_ANSWERS = {
   today: {
     reply:
       'A good day. You spent **S$642** and got **19 new enquiries** — that’s about **S$34 each**, a little cheaper than usual. Google brought in the most (8 enquiries). One thing to watch: your “Retirement Gap” ad is getting tired — the same people keep seeing it, so it’s costing more.',
-    actions: [{ label: 'Show me that ad', kind: 'admanager' }]
+    actions: []
   },
   cpl: {
     reply:
       'Right now each new enquiry costs you **S$34.94** on average. Last week it was S$31.20. One ad is behind the jump — **“Retirement Gap”**. People have seen it too many times, so fewer are clicking and each click costs more. Your other ads are fine.',
-    actions: [{ label: 'Show me that ad', kind: 'admanager' }]
+    actions: []
   },
   best: {
     reply:
       'Your best performer is **“Insurance — Exact Match”** on Google. Each enquiry from it costs just **S$22.35** — about a third cheaper than the rest — and it could bring in more if it had more budget. Want me to show you what moving S$50 a day into it would do?',
-    actions: [
-      { label: 'Yes, show me', kind: 'admanager' },
-      { label: 'See all ads ranked', kind: 'admanager' }
-    ]
+    actions: []
   }
 };
 
@@ -56,11 +53,8 @@ HOW TO SPEAK — this matters as much as being right:
   "A good day. You spent **S$642** and got **19 new enquiries** — that's about **S$34 each**, a little cheaper than usual."
   "People have seen it too many times, so fewer are clicking and each click costs more. Your other ads are fine."
 
-ACTIONS — after the reply, offer at most 2 follow-up buttons, choosing kinds from:
-- "admanager": open the Campaigns tab (for seeing/changing campaigns)
-
 Return ONLY JSON, no markdown fences:
-{"reply":"...","actions":[{"label":"...","kind":"..."}]}`;
+{"reply":"...","actions":[]}`;
 
 async function askClaude(context, message) {
   const content = `THE USER'S DASHBOARD RIGHT NOW (their real numbers):\n${JSON.stringify(context).slice(0, 14000)}\n\nTHE USER ASKS: ${message}`;
@@ -82,10 +76,7 @@ async function askClaude(context, message) {
   const d = await r.json();
   const text = (d.content || []).filter((c) => c.type === 'text').map((c) => c.text).join('');
   const out = parseJson(text);
-  const actions = Array.isArray(out.actions)
-    ? out.actions.filter((a) => a && a.kind === 'admanager').slice(0, 2)
-    : [];
-  return { reply: String(out.reply || text).slice(0, 2000), actions };
+  return { reply: String(out.reply || text).slice(0, 2000), actions: [] };
 }
 
 // Demo mode: no session, and the client's context is IGNORED - the server

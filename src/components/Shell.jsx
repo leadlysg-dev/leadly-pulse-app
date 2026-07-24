@@ -1,5 +1,4 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useDemo } from '../demo/DemoContext';
 import { DEMO_MESSAGE, DEMO_BLOCKED_EVENT } from '../demo/constants';
@@ -14,46 +13,13 @@ const ICONS = {
     <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
       <path d="M1 9h3l2-5 3 8 2-5h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
-  ),
-  admanager: (
-    <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
-      <path d="M9 2.5L14 5v6l-5 2.5L4 11V5l5-2.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M2 6.5v5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
   )
 };
 
-const TABS = [
-  { id: 'pulse', to: '/pulse.html', label: 'Pulse' },
-  { id: 'admanager', to: '/campaigns.html', label: 'Campaigns' }
-];
-
-// Where each tab lives inside the demo - same components, /demo paths.
-const DEMO_TO = {
-  pulse: '/demo',
-  admanager: '/demo/campaigns'
-};
-
-function NavItems({ pathname, mobile, demo }) {
-  return TABS.map((t) => {
-    const to = demo ? DEMO_TO[t.id] || t.to : t.to;
-    return (
-      <Link
-        key={t.id}
-        to={to}
-        className={`nav-item${pathname === to ? ' active' : ''}`}
-        role="tab"
-        aria-selected={pathname === to}
-      >
-        {ICONS[t.id]}
-        {t.label}
-      </Link>
-    );
-  });
-}
+// Only one tab (Pulse) remains, so it renders as a static label, not a
+// tab-switcher - a nav with a single destination is pointless UI.
 
 export default function Shell({ title, children }) {
-  const { pathname } = useLocation();
   const isDemo = useDemo();
 
   const [status, setStatus] = useState(null);
@@ -127,9 +93,12 @@ export default function Shell({ title, children }) {
               Leadly <span>Pulse</span>
             </div>
           </div>
-          <nav className="nav" role="tablist" aria-label="Main navigation">
+          <nav className="nav" aria-label="Main navigation">
             <div className="nav-label">Workspace</div>
-            <NavItems pathname={pathname} demo={isDemo} />
+            <span className="nav-item active">
+              {ICONS.pulse}
+              Pulse
+            </span>
           </nav>
           <div className="sidebar-foot">
             <button
@@ -191,9 +160,6 @@ export default function Shell({ title, children }) {
           <main className="content">
             <div className="tab-pane">{children}</div>
           </main>
-          <nav className="mobile-nav" aria-label="Main navigation">
-            <NavItems pathname={pathname} mobile demo={isDemo} />
-          </nav>
         </div>
       </div>
       {toastMsg && <div className="toast" role="status">{toastMsg}</div>}

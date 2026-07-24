@@ -162,10 +162,6 @@ function PulseBar({ context }) {
     [phase, context, role]
   );
 
-  const act = (a) => {
-    if (a.kind === 'admanager') window.location.href = '/campaigns.html';
-  };
-
   return (
     <div className="pulse-bar" role="complementary" aria-label="Pulse assistant">
       <div className="pb-top">
@@ -208,15 +204,6 @@ function PulseBar({ context }) {
                 <span className="cache-note">Generated just now</span>
               </div>
               <RichText text={typed} />
-              {typed.length >= String(answer.reply || '').length && (
-                <div className="insight-act">
-                  {(answer.actions || []).map((a, i) => (
-                    <button key={i} type="button" className={`sbtn ${i === 0 ? 'sbtn-primary' : 'sbtn-ghost'} sbtn-sm`} onClick={() => act(a)}>
-                      {a.label}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -552,9 +539,6 @@ function PerformanceBreakdown({ config, trees, platform, compare, prevIndex, ema
     <>
       <div className="section-head">
         <span className="section-title">Performance breakdown</span>
-        <Link className="sbtn sbtn-ghost sbtn-sm" to="/campaigns.html">
-          Manage in Campaigns →
-        </Link>
       </div>
       <div className="toolbar" style={{ marginBottom: 10 }}>
         <TableControls search={search} onSearch={setSearch} filters={filters} onFilters={setFilters} fields={filterFields} placeholder="Search campaigns, ad sets, ads…" />
@@ -624,142 +608,6 @@ function PerformanceBreakdown({ config, trees, platform, compare, prevIndex, ema
                     </tr>
                   );
                 })}
-              </tbody>
-            </table>
-          </TableScroll>
-        </div>
-      )}
-    </>
-  );
-}
-
-/* ── Creative performance: every ad, flat, READ-ONLY ───────────── */
-function CreativePerformance({ config, trees, email }) {
-  const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState([]);
-  const sortKey = `creative-sort:${email}`;
-  const [sort, setSort] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(`creative-sort:${email}`)) || { col: 'spend', dir: 'desc' };
-    } catch {
-      return { col: 'spend', dir: 'desc' };
-    }
-  });
-  useEffect(() => {
-    try {
-      localStorage.setItem(sortKey, JSON.stringify(sort));
-    } catch {
-      // storage unavailable - sort just won't persist
-    }
-  }, [sort, sortKey]);
-
-  const cols = useMemo(() => masterColumns(config), [config]);
-  const colById = useMemo(() => Object.fromEntries(cols.map((c) => [c.id, c])), [cols]);
-
-  // every ad across both platforms and all campaigns, one flat row each
-  const ads = useMemo(() => {
-    if (!trees) return null;
-    const out = [];
-    for (const channel of ['meta', 'google']) {
-      const t = trees[channel];
-      if (t?.state !== 'ok') continue;
-      for (const camp of t.campaigns || []) {
-        for (const group of camp.children || []) {
-          for (const ad of group.children || []) {
-            out.push({
-              ...ad,
-              channel,
-              campaign: camp.name,
-              format: (ad.metrics?.events?.video_view || 0) > 0 ? 'video' : 'image'
-            });
-          }
-        }
-      }
-    }
-    return out;
-  }, [trees]);
-
-  const campaignNames = useMemo(() => [...new Set((ads || []).map((a) => a.campaign))], [ads]);
-  const filterFields = useMemo(
-    () => [
-      { id: 'platform', label: 'Platform', kind: 'choice', options: [{ value: 'meta', label: 'Meta' }, { value: 'google', label: 'Google' }] },
-      { id: 'format', label: 'Format', kind: 'choice', options: [{ value: 'image', label: 'Image' }, { value: 'video', label: 'Video' }] },
-      { id: 'campaign', label: 'Campaign', kind: 'choice', options: campaignNames.map((n) => ({ value: n, label: n })).slice(0, 20) },
-      ...cols.map((c) => ({ id: c.id, label: c.label, kind: 'number', money: /spend|cost|cpc|cpm/i.test(c.id) }))
-    ],
-    [campaignNames, cols]
-  );
-
-  const rows = useMemo(() => {
-    if (!ads) return [];
-    const valueOf = (a, field) =>
-      field === 'platform' ? a.channel : field === 'format' ? a.format : field === 'campaign' ? a.campaign : nodeValue(colById[field], a, a.channel);
-    const keep = filterPredicate(filters, filterFields, valueOf);
-    const list = ads.filter((a) => keep(a) && (!search.trim() || `${a.name} ${a.campaign}`.toLowerCase().includes(search.trim().toLowerCase())));
-    const dir = sort.dir === 'asc' ? 1 : -1;
-    if (sort.col === 'name') list.sort((a, b) => a.name.localeCompare(b.name) * dir);
-    else if (colById[sort.col]) {
-      const col = colById[sort.col];
-      list.sort((a, b) => ((nodeValue(col, a, a.channel) ?? -Infinity) - (nodeValue(col, b, b.channel) ?? -Infinity)) * dir);
-    }
-    return list;
-  }, [ads, search, filters, filterFields, sort, colById]);
-  const setSortCol = (col) =>
-    setSort((s) => (s.col === col ? { col, dir: s.dir === 'desc' ? 'asc' : 'desc' } : { col, dir: 'desc' }));
-
-  return (
-    <>
-      <div className="section-head" style={{ marginTop: 18 }}>
-        <span className="section-title">Creative performance</span>
-        <span className="section-sub">Every ad, across platforms and campaigns</span>
-      </div>
-      <div className="toolbar" style={{ marginBottom: 10 }}>
-        <TableControls search={search} onSearch={setSearch} filters={filters} onFilters={setFilters} fields={filterFields} placeholder="Search ads…" />
-      </div>
-      {!ads && <div className="scard" style={{ padding: 24 }}><div className="skeleton" style={{ height: 120 }} /></div>}
-      {ads && (
-        <div className="scard" style={{ overflow: 'hidden' }}>
-          <TableScroll>
-            <table className="spec-table perf-table">
-              <thead>
-                <tr>
-                  <th className="pin th-sort" onClick={() => setSortCol('name')}>
-                    Ad{sort.col === 'name' && <span className="dir">{sort.dir === 'desc' ? '↓' : '↑'}</span>}
-                  </th>
-                  <th>Platform</th>
-                  {cols.map((c) => (
-                    <th key={c.id} className="num th-sort" onClick={() => setSortCol(c.id)}>
-                      {c.label}
-                      {sort.col === c.id && <span className="dir">{sort.dir === 'desc' ? '↓' : '↑'}</span>}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.length === 0 && (
-                  <tr>
-                    <td className="pin" colSpan={2 + cols.length}>
-                      <span className="section-sub">No ads delivered in this view.</span>
-                    </td>
-                  </tr>
-                )}
-                {rows.map((a) => (
-                  <tr key={`${a.channel}:${a.id}`} className={`plat-${a.channel}`}>
-                    <td className="pin">
-                      <div className="adm-name-cell">
-                        <div className={`ad-thumb ${THUMBS[(a.id || '').length % THUMBS.length]}`}>{a.format === 'video' ? '▶' : 'AD'}</div>
-                        <div>
-                          <div className="tname">{a.name}</div>
-                          <div className="tsub">{a.campaign}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td><PlatChip channel={a.channel} /></td>
-                    {cols.map((col) => (
-                      <td key={col.id} className="num">{formatCol(col, nodeValue(col, a, a.channel))}</td>
-                    ))}
-                  </tr>
-                ))}
               </tbody>
             </table>
           </TableScroll>
@@ -1021,8 +869,6 @@ export default function PulseTab() {
           <SixCharts config={config} report={report} platform={platform} compare={compare} range={range} />
 
           <PerformanceBreakdown config={config} trees={trees} platform={platform} compare={compare} prevIndex={prevIndex} email={email} />
-
-          <CreativePerformance config={config} trees={trees} email={email} />
         </>
       )}
 
